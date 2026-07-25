@@ -48,7 +48,7 @@ export function toIsoOrNull(value: unknown): string | null {
 export function friendlyDbError(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error);
   if (message.includes("DATABASE_URL")) {
-    return "DATABASE_URL is not set. Add your Neon connection string to .env.local (locally) or the Vercel project settings — see the README.";
+    return "DATABASE_URL is not set. Add your Neon connection string to .env.local (locally) or as a Cloudflare Worker secret — see the README.";
   }
   if (message.includes("does not exist")) {
     return "The database tables are missing. Run `npm run migrate` once against your Neon database — see the README.";

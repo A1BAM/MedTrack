@@ -6,7 +6,8 @@ including how effectiveness rises and falls in the hours after a dose.
 
 Built with Next.js (App Router) + TypeScript, Tailwind, Recharts, and Neon
 Postgres via `@neondatabase/serverless`. Writes go through Server Actions — no
-separate API layer.
+separate API layer. Deploys to Cloudflare Workers via
+[`@opennextjs/cloudflare`](https://opennext.js.org/cloudflare).
 
 ## Screens
 
@@ -22,46 +23,84 @@ separate API layer.
   dose (when it kicks in / wears off), and stat tiles, with 7d/30d/90d/all
   filters.
 
-## Setup
+## Access protection
 
-1. Create a [Neon](https://neon.tech) project and copy its connection string.
-2. Configure the environment:
+The whole app sits behind a password. Middleware checks a signed session
+cookie on every request (pages, data, and Server Action writes alike) and
+redirects to `/login` otherwise — including when the auth secrets aren't
+configured yet, so it fails closed. Logging in with `APP_PASSWORD` sets an
+HttpOnly cookie signed with `SESSION_SECRET` (HMAC-SHA256), valid for 30 days.
 
-   ```bash
-   cp .env.example .env.local
-   # then edit .env.local:
-   #   DATABASE_URL             — your Neon connection string
-   #   NEXT_PUBLIC_MED_NAME     — the medication name shown in the UI
-   #   NEXT_PUBLIC_TYPICAL_DOSE_MG — your typical dose in mg
-   ```
+Pick a long, unique password — it is the only thing between the internet and
+your health data. For an extra layer you can additionally put the Worker
+behind [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/)
+on a custom domain.
 
-3. Install and create the tables:
+## 1. Create the database (Neon)
 
-   ```bash
-   npm install
-   npm run migrate   # applies migrations/*.sql to DATABASE_URL (safe to re-run)
-   ```
+If you already have another project on Neon (e.g. another app's database),
+keep MedTrack separate by creating a **new project**:
 
-   (Alternatively, paste `migrations/001_init.sql` into the Neon SQL editor.)
+1. Go to [console.neon.tech](https://console.neon.tech) → **New Project**.
+   Name it `medtrack`, pick the region closest to you (free plan allows
+   multiple projects).
+2. On the new project's dashboard, click **Connect**, make sure the
+   `medtrack` project / `main` branch is selected, and copy the connection
+   string (`postgres://…neon.tech/neondb?sslmode=require`). That string is
+   your `DATABASE_URL`.
 
-4. Run it:
+If your plan won't allow another project, the fallback is: open the existing
+project → **Databases** → **New database** → `medtrack`, then copy the
+connection string from **Connect** with the `medtrack` database selected.
+The data stays fully separate either way (different database), it just shares
+the project's compute.
 
-   ```bash
-   npm run dev
-   ```
+## 2. Configure and run locally
 
-## Deploying to Vercel
+```bash
+cp .env.example .env.local
+# edit .env.local:
+#   DATABASE_URL                — the Neon connection string from step 1
+#   APP_PASSWORD                — the password that unlocks the app
+#   SESSION_SECRET              — run: openssl rand -hex 32
+#   NEXT_PUBLIC_MED_NAME        — medication name shown in the UI
+#   NEXT_PUBLIC_TYPICAL_DOSE_MG — your typical dose in mg
 
-1. Push this repo to GitHub and import it into Vercel.
-2. In the Vercel project settings, add the same three environment variables
-   (`DATABASE_URL`, `NEXT_PUBLIC_MED_NAME`, `NEXT_PUBLIC_TYPICAL_DOSE_MG`).
-3. Deploy. Run the migration once against the same database (step 3 above)
-   if you haven't already.
+npm install
+npm run migrate   # applies migrations/*.sql to DATABASE_URL (safe to re-run)
+npm run dev
+```
 
-> **Note:** there is no authentication — anyone with the URL can read and
-> write your data. Keep the URL private, or put the deployment behind
-> protection (e.g. Vercel's deployment protection, Cloudflare Access, or
-> similar) since this logs personal health information.
+(Alternatively, paste `migrations/001_init.sql` into the Neon SQL editor.)
+
+## 3. Deploy to Cloudflare Workers
+
+```bash
+npx wrangler login   # once
+npm run deploy       # builds with OpenNext and deploys the Worker
+```
+
+Then set the three secrets on the deployed Worker (they live on Cloudflare,
+not in the repo):
+
+```bash
+npx wrangler secret put DATABASE_URL
+npx wrangler secret put APP_PASSWORD
+npx wrangler secret put SESSION_SECRET
+```
+
+Dashboard alternative: **Workers & Pages → medtrack → Settings → Variables
+and Secrets → Add → Secret**.
+
+Notes:
+
+- The `NEXT_PUBLIC_*` name/dose values are baked in at build time from
+  `.env.local` on the machine running `npm run deploy` — they don't need to
+  be Worker secrets.
+- `npm run preview` runs the real Workers runtime locally; it reads secrets
+  from a `.dev.vars` file (copy `.dev.vars.example`, it's gitignored).
+- The migration runs from your machine (`npm run migrate`), not from the
+  Worker.
 
 ## Data model
 
