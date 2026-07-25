@@ -1,8 +1,8 @@
 # MedTrack
 
-A personal, single-user medication effectiveness tracker. Log doses from your
-phone, check in on how well the medication is working (0–10), and see trends —
-including how effectiveness rises and falls in the hours after a dose.
+A personal, single-user medication tracker. Log doses from your phone, mark
+the moment the medication peaks, and see trends — above all, how long it takes
+to peak and whether that's drifting.
 
 Built with Next.js (App Router) + TypeScript, Tailwind, Recharts, and Neon
 Postgres via `@neondatabase/serverless`. Writes go through Server Actions — no
@@ -14,14 +14,16 @@ separate API layer. Deploys to Cloudflare Workers via
 - **Log** (home) — one big button that logs a dose at the current time with
   your typical amount; expandable options for a different amount, a backdated
   time, or notes.
-- **Check-in** — rate effectiveness 0–10, note side effects. The check-in
-  auto-links to the most recent dose taken within the last 16 hours; you can
-  pick a different dose or save it unlinked.
-- **History** — doses with their check-ins nested under them, grouped by day.
-  Delete entries, or re-link/unlink a check-in.
-- **Trends** — effectiveness over time, average effectiveness by hours after
-  dose (when it kicks in / wears off), and stat tiles, with 7d/30d/90d/all
-  filters.
+- **Peak** — one big button that records the peak at the current time, plus
+  options for a different time, side effects, and notes. It shows how long
+  after your dose the peak landed, and auto-links to the most recent dose
+  taken in the 16 hours before it; you can pick a different dose or save it
+  unlinked.
+- **History** — doses with their peaks nested under them, grouped by day,
+  each peak showing how long after the dose it came. Delete entries, or
+  re-link/unlink a peak.
+- **Trends** — time to peak over time, a distribution of how long it usually
+  takes, and stat tiles, with 7d/30d/90d/all filters.
 
 ## Access protection
 
@@ -116,13 +118,18 @@ Notes:
 
 ## Data model
 
-Two tables (see `migrations/001_init.sql`):
+Two tables (see `migrations/`):
 
 - `doses` — `taken_at`, `amount` (mg), optional `notes`.
-- `check_ins` — `effectiveness` (0–10), optional `side_effects` and `notes`,
-  and a nullable `dose_id` (`on delete cascade`). A new check-in is linked to
-  the most recent dose within the last 16 hours at save time; the link can be
-  overridden or removed from the Check-in form or from History.
+- `peaks` — `peak_at` (when the peak happened), `recorded_at` (when it was
+  logged), optional `side_effects` and `notes`, and a nullable `dose_id`
+  (`on delete cascade`). A new peak is linked to the most recent dose taken
+  in the 16 hours before it, resolved at save time; the link can be
+  overridden or removed from the Peak form or from History.
+
+Migrations apply in filename order and are safe to re-run. `002_peaks.sql`
+replaced an earlier 0–10 effectiveness rating with `peak_at` and renamed
+`check_ins` to `peaks`.
 
 The medication name and typical dose are env vars rather than a table, since
 the app tracks exactly one medication for one person.

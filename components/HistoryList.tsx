@@ -2,20 +2,22 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { deleteCheckIn, deleteDose, setCheckInLink } from "@/lib/actions";
-import { fmtDateTime, fmtDayHeading, fmtTime } from "@/lib/format";
-import type { CheckIn, Dose } from "@/lib/types";
+import { deleteDose, deletePeak, setPeakLink } from "@/lib/actions";
+import { fmtDateTime, fmtDayHeading, fmtDuration, fmtTime } from "@/lib/format";
+import type { Dose, Peak } from "@/lib/types";
+
+const HOUR_MS = 3_600_000;
 
 type TimelineItem =
-  | { kind: "dose"; ts: number; dose: Dose; linked: CheckIn[] }
-  | { kind: "checkin"; ts: number; checkIn: CheckIn };
+  | { kind: "dose"; ts: number; dose: Dose; linked: Peak[] }
+  | { kind: "peak"; ts: number; peak: Peak };
 
 export default function HistoryList({
   doses,
-  checkIns,
+  peaks,
 }: {
   doses: Dose[];
-  checkIns: CheckIn[];
+  peaks: Peak[];
 }) {
   // Day grouping and time labels depend on the viewer's timezone, so wait
   // for mount before rendering anything date-derived.
@@ -23,12 +25,12 @@ export default function HistoryList({
   useEffect(() => setMounted(true), []);
 
   const groups = useMemo(() => {
-    const linkedByDose = new Map<number, CheckIn[]>();
-    for (const checkIn of checkIns) {
-      if (checkIn.doseId == null) continue;
-      const list = linkedByDose.get(checkIn.doseId) ?? [];
-      list.push(checkIn);
-      linkedByDose.set(checkIn.doseId, list);
+    const linkedByDose = new Map<number, Peak[]>();
+    for (const peak of peaks) {
+      if (peak.doseId == null) continue;
+      const list = linkedByDose.get(peak.doseId) ?? [];
+      list.push(peak);
+      linkedByDose.set(peak.doseId, list);
     }
     const items: TimelineItem[] = [
       ...doses.map((dose) => ({
@@ -36,16 +38,15 @@ export default function HistoryList({
         ts: new Date(dose.takenAt).getTime(),
         dose,
         linked: (linkedByDose.get(dose.id) ?? []).sort(
-          (a, b) =>
-            new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime()
+          (a, b) => new Date(a.peakAt).getTime() - new Date(b.peakAt).getTime()
         ),
       })),
-      ...checkIns
-        .filter((checkIn) => checkIn.doseId == null)
-        .map((checkIn) => ({
-          kind: "checkin" as const,
-          ts: new Date(checkIn.recordedAt).getTime(),
-          checkIn,
+      ...peaks
+        .filter((peak) => peak.doseId == null)
+        .map((peak) => ({
+          kind: "peak" as const,
+          ts: new Date(peak.peakAt).getTime(),
+          peak,
         })),
     ].sort((a, b) => b.ts - a.ts);
 
@@ -60,7 +61,7 @@ export default function HistoryList({
       }
     }
     return byDay;
-  }, [doses, checkIns]);
+  }, [doses, peaks]);
 
   if (!mounted) {
     return (
@@ -100,9 +101,9 @@ export default function HistoryList({
                   doses={doses}
                 />
               ) : (
-                <CheckInCard
-                  key={`c${item.checkIn.id}`}
-                  checkIn={item.checkIn}
+                <PeakCard
+                  key={`p${item.peak.id}`}
+                  peak={item.peak}
                   doses={doses}
                   standalone
                 />
@@ -121,7 +122,7 @@ function DoseCard({
   doses,
 }: {
   dose: Dose;
-  linked: CheckIn[];
+  linked: Peak[];
   doses: Dose[];
 }) {
   const router = useRouter();
@@ -129,7 +130,7 @@ function DoseCard({
 
   const remove = () => {
     const suffix = linked.length
-      ? ` Its ${linked.length} linked check-in${linked.length > 1 ? "s" : ""} will be deleted too.`
+      ? ` Its ${linked.length} linked peak${linked.length > 1 ? "s" : ""} will be deleted too.`
       : "";
     if (!confirm(`Delete this dose?${suffix}`)) return;
     startTransition(async () => {
@@ -150,20 +151,22 @@ function DoseCard({
         <DeleteButton onClick={remove} label="Delete dose" />
       </div>
       {dose.notes && <p className="mt-1 text-sm text-ink-2">{dose.notes}</p>}
-      {linked.map((checkIn) => (
-        <CheckInCard key={checkIn.id} checkIn={checkIn} doses={doses} />
+      {linked.map((peak) => (
+        <PeakCard key={peak.id} peak={peak} doses={doses} dose={dose} />
       ))}
     </article>
   );
 }
 
-function CheckInCard({
-  checkIn,
+function PeakCard({
+  peak,
   doses,
+  dose,
   standalone = false,
 }: {
-  checkIn: CheckIn;
+  peak: Peak;
   doses: Dose[];
+  dose?: Dose; // the dose it's linked to, when nested under one
   standalone?: boolean;
 }) {
   const router = useRouter();
@@ -171,28 +174,32 @@ function CheckInCard({
   const [editingLink, setEditingLink] = useState(false);
 
   const remove = () => {
-    if (!confirm("Delete this check-in?")) return;
+    if (!confirm("Delete this peak?")) return;
     startTransition(async () => {
-      await deleteCheckIn(checkIn.id);
+      await deletePeak(peak.id);
       router.refresh();
     });
   };
 
   const saveLink = (value: string) => {
     startTransition(async () => {
-      await setCheckInLink(checkIn.id, value === "none" ? null : Number(value));
+      await setPeakLink(peak.id, value === "none" ? null : Number(value));
       setEditingLink(false);
       router.refresh();
     });
   };
 
-  // Sensible relink candidates: doses taken before this check-in, up to 48 h
+  const peakMs = new Date(peak.peakAt).getTime();
+  const hoursAfter = dose
+    ? (peakMs - new Date(dose.takenAt).getTime()) / HOUR_MS
+    : null;
+
+  // Sensible relink candidates: doses taken before this peak, up to 48 h
   // earlier — plus whatever it's currently linked to.
-  const recordedTs = new Date(checkIn.recordedAt).getTime();
-  const candidates = doses.filter((dose) => {
-    if (dose.id === checkIn.doseId) return true;
-    const takenTs = new Date(dose.takenAt).getTime();
-    return takenTs <= recordedTs && recordedTs - takenTs <= 48 * 3_600_000;
+  const candidates = doses.filter((d) => {
+    if (d.id === peak.doseId) return true;
+    const takenTs = new Date(d.takenAt).getTime();
+    return takenTs <= peakMs && peakMs - takenTs <= 48 * HOUR_MS;
   });
 
   return (
@@ -204,15 +211,15 @@ function CheckInCard({
       } ${busy ? "opacity-50" : ""}`}
     >
       <div className="flex items-center justify-between gap-2">
-        <p className="flex items-center gap-2">
+        <p className="flex flex-wrap items-center gap-x-2">
           <span className="inline-flex items-center rounded-full bg-accent/15 px-2 py-0.5 text-sm font-semibold">
-            {checkIn.effectiveness}/10
+            peak {fmtTime(peak.peakAt)}
           </span>
-          <span className="text-sm text-ink-2">
-            {standalone
-              ? fmtTime(checkIn.recordedAt)
-              : `check-in · ${fmtTime(checkIn.recordedAt)}`}
-          </span>
+          {hoursAfter != null && hoursAfter >= 0 && (
+            <span className="text-sm text-ink-2">
+              {fmtDuration(hoursAfter)} after dose
+            </span>
+          )}
         </p>
         <div className="flex items-center gap-1">
           <button
@@ -236,34 +243,31 @@ function CheckInCard({
               />
             </svg>
           </button>
-          <DeleteButton onClick={remove} label="Delete check-in" />
+          <DeleteButton onClick={remove} label="Delete peak" />
         </div>
       </div>
       {standalone && (
         <p className="mt-1 text-xs text-muted">Not linked to a dose</p>
       )}
-      {checkIn.sideEffects && (
+      {peak.sideEffects && (
         <p className="mt-1 text-sm">
-          <span className="text-muted">Side effects:</span>{" "}
-          {checkIn.sideEffects}
+          <span className="text-muted">Side effects:</span> {peak.sideEffects}
         </p>
       )}
-      {checkIn.notes && (
-        <p className="mt-1 text-sm text-ink-2">{checkIn.notes}</p>
-      )}
+      {peak.notes && <p className="mt-1 text-sm text-ink-2">{peak.notes}</p>}
       {editingLink && (
         <div className="mt-2 flex items-center gap-2">
           <select
-            defaultValue={checkIn.doseId == null ? "none" : String(checkIn.doseId)}
+            defaultValue={peak.doseId == null ? "none" : String(peak.doseId)}
             onChange={(e) => saveLink(e.target.value)}
             disabled={busy}
             className="h-10 w-full rounded-lg border border-grid bg-card px-2 text-sm"
             aria-label="Linked dose"
           >
             <option value="none">No dose</option>
-            {candidates.map((dose) => (
-              <option key={dose.id} value={String(dose.id)}>
-                {fmtDateTime(dose.takenAt)} · {dose.amount} mg
+            {candidates.map((d) => (
+              <option key={d.id} value={String(d.id)}>
+                {fmtDateTime(d.takenAt)} · {d.amount} mg
               </option>
             ))}
           </select>

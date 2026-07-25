@@ -104,10 +104,10 @@ export default function DoseForm({ typicalDose }: { typicalDose: number }) {
           {state.message}{" "}
           {state.ok && (
             <Link
-              href="/check-in"
+              href="/peak"
               className="font-medium text-accent underline underline-offset-2"
             >
-              Check in when it kicks in →
+              Log the peak when it hits →
             </Link>
           )}
         </p>

@@ -33,6 +33,26 @@ export function fmtDayHeading(date: Date): string {
   });
 }
 
+// A duration in hours, rendered as "45 min" / "2 h" / "2 h 47 min".
+export function fmtDuration(hours: number): string {
+  const totalMinutes = Math.max(0, Math.round(hours * 60));
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  if (h === 0) return `${m} min`;
+  if (m === 0) return `${h} h`;
+  return `${h} h ${m} min`;
+}
+
+// Same duration, compact enough for a stat tile: "45m" / "3h" / "2h 29m".
+export function fmtDurationShort(hours: number): string {
+  const totalMinutes = Math.max(0, Math.round(hours * 60));
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
+}
+
 export function fmtAgo(iso: string): string {
   const ms = Date.now() - new Date(iso).getTime();
   if (ms < 60_000) return "just now";

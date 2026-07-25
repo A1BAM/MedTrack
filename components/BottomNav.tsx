@@ -12,14 +12,14 @@ const TABS = [
     ),
   },
   {
-    href: "/check-in",
-    label: "Check-in",
+    href: "/peak",
+    label: "Peak",
     icon: (
-      <>
-        <rect x="5" y="4" width="14" height="17" rx="2" />
-        <path d="M9 4.5V3h6v1.5" strokeLinecap="round" />
-        <path d="m8.5 13 2.5 2.5 4.5-5" strokeLinecap="round" strokeLinejoin="round" />
-      </>
+      <path
+        d="M3 19h18L13.4 6.6a1.7 1.7 0 0 0-2.8 0L3 19z"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     ),
   },
   {

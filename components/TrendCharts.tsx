@@ -12,8 +12,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { fmtDateTime } from "@/lib/format";
-import type { Dose, TrendCheckIn } from "@/lib/types";
+import { fmtDateTime, fmtDuration, fmtDurationShort } from "@/lib/format";
+import type { Dose, TrendPeak } from "@/lib/types";
 
 const RANGES = [
   { key: "7d", label: "7d", days: 7 },
@@ -24,21 +24,17 @@ const RANGES = [
 
 type RangeKey = (typeof RANGES)[number]["key"];
 
-type TimelinePoint = {
-  t: number;
-  effectiveness: number;
-  hoursSince: number | null;
-};
+type TimelinePoint = { id: number; t: number; hours: number };
 
 const HOUR_MS = 3_600_000;
 const DAY_MS = 24 * HOUR_MS;
-const COURSE_HOURS = 17; // buckets 0..16 — matches the 16 h auto-link window
+const MAX_HOURS = 17; // buckets 0..16 — matches the 16 h auto-link window
 
 export default function TrendCharts({
-  checkIns,
+  peaks,
   doses,
 }: {
-  checkIns: TrendCheckIn[]; // recorded_at ascending
+  peaks: TrendPeak[]; // peak_at ascending
   doses: Dose[];
 }) {
   const [range, setRange] = useState<RangeKey>("30d");
@@ -51,58 +47,61 @@ export default function TrendCharts({
     const now = Date.now();
     const cutoff = days == null ? -Infinity : now - days * DAY_MS;
 
-    const inRange = checkIns.filter(
-      (c) => new Date(c.recordedAt).getTime() >= cutoff
+    const hoursToPeak = (peak: TrendPeak): number | null => {
+      if (!peak.doseTakenAt) return null;
+      const hours =
+        (new Date(peak.peakAt).getTime() -
+          new Date(peak.doseTakenAt).getTime()) /
+        HOUR_MS;
+      return hours >= 0 && hours < MAX_HOURS ? hours : null;
+    };
+
+    const inRange = peaks.filter(
+      (p) => new Date(p.peakAt).getTime() >= cutoff
     );
     const dosesInRange = doses.filter(
       (d) => new Date(d.takenAt).getTime() >= cutoff
     );
 
-    const avg = (list: TrendCheckIn[]) =>
+    const timeline: TimelinePoint[] = [];
+    for (const peak of inRange) {
+      const hours = hoursToPeak(peak);
+      if (hours == null) continue;
+      timeline.push({
+        id: peak.id,
+        t: new Date(peak.peakAt).getTime(),
+        hours,
+      });
+    }
+    const unlinked = inRange.length - timeline.length;
+
+    const average = (list: TimelinePoint[]) =>
       list.length
-        ? list.reduce((sum, c) => sum + c.effectiveness, 0) / list.length
+        ? list.reduce((sum, p) => sum + p.hours, 0) / list.length
         : null;
-    const avgNow = avg(inRange);
+    const avgNow = average(timeline);
 
     let delta: number | null = null;
     if (days != null && avgNow != null) {
-      const prev = checkIns.filter((c) => {
-        const t = new Date(c.recordedAt).getTime();
-        return t >= cutoff - days * DAY_MS && t < cutoff;
-      });
-      const avgPrev = avg(prev);
-      if (avgPrev != null) delta = avgNow - avgPrev;
+      const prior: TimelinePoint[] = [];
+      for (const peak of peaks) {
+        const t = new Date(peak.peakAt).getTime();
+        if (t < cutoff - days * DAY_MS || t >= cutoff) continue;
+        const hours = hoursToPeak(peak);
+        if (hours != null) prior.push({ id: peak.id, t, hours });
+      }
+      const avgPrior = average(prior);
+      if (avgPrior != null) delta = avgNow - avgPrior;
     }
 
-    const timeline: TimelinePoint[] = inRange.map((c) => {
-      const t = new Date(c.recordedAt).getTime();
-      const hoursSince = c.doseTakenAt
-        ? (t - new Date(c.doseTakenAt).getTime()) / HOUR_MS
-        : null;
-      return { t, effectiveness: c.effectiveness, hoursSince };
-    });
-
-    const buckets = Array.from({ length: COURSE_HOURS }, (_, hour) => ({
+    const buckets = Array.from({ length: MAX_HOURS }, (_, hour) => ({
       hour,
-      sum: 0,
-      n: 0,
+      count: 0,
     }));
-    for (const point of timeline) {
-      if (point.hoursSince == null) continue;
-      if (point.hoursSince < 0 || point.hoursSince >= COURSE_HOURS) continue;
-      const bucket = buckets[Math.floor(point.hoursSince)];
-      bucket.sum += point.effectiveness;
-      bucket.n += 1;
-    }
-    const course = buckets.map((b) => ({
-      hour: b.hour,
-      avg: b.n ? b.sum / b.n : null,
-      n: b.n,
-    }));
-    const linkedCount = course.reduce((sum, b) => sum + b.n, 0);
+    for (const point of timeline) buckets[Math.floor(point.hours)].count += 1;
 
-    return { days, inRange, dosesInRange, avgNow, delta, timeline, course, linkedCount };
-  }, [checkIns, doses, range]);
+    return { days, inRange, dosesInRange, timeline, unlinked, avgNow, delta, buckets };
+  }, [peaks, doses, range]);
 
   if (!mounted) {
     return (
@@ -117,7 +116,7 @@ export default function TrendCharts({
     );
   }
 
-  const { days, inRange, dosesInRange, avgNow, delta, timeline, course, linkedCount } =
+  const { days, inRange, dosesInRange, timeline, unlinked, avgNow, delta, buckets } =
     view;
 
   return (
@@ -146,27 +145,31 @@ export default function TrendCharts({
       {/* Stat tiles */}
       <div className="grid grid-cols-3 gap-2">
         <StatTile
-          label="Avg effect"
-          value={avgNow == null ? "—" : avgNow.toFixed(1)}
+          label="Avg to peak"
+          value={avgNow == null ? "—" : fmtDurationShort(avgNow)}
           sub={
             delta == null ? undefined : (
-              <span className={delta > 0 ? "text-good" : "text-ink-2"}>
+              <span className="text-ink-2">
                 {delta > 0 ? "↑" : delta < 0 ? "↓" : "＝"}{" "}
-                {Math.abs(delta).toFixed(1)} vs prior {days}d
+                {fmtDurationShort(Math.abs(delta))} vs prior {days}d
               </span>
             )
           }
         />
-        <StatTile label="Check-ins" value={String(inRange.length)} />
+        <StatTile label="Peaks" value={String(inRange.length)} />
         <StatTile label="Doses" value={String(dosesInRange.length)} />
       </div>
 
-      {/* Effectiveness over time */}
+      {/* Time to peak over time */}
       <section className="rounded-2xl border border-grid bg-card p-4">
-        <h2 className="text-sm font-semibold">Effectiveness over time</h2>
-        <p className="text-xs text-muted">Each point is one check-in, 0–10.</p>
+        <h2 className="text-sm font-semibold">Time to peak</h2>
+        <p className="text-xs text-muted">
+          Hours from dose to peak, one point per logged peak.
+        </p>
         {timeline.length === 0 ? (
-          <EmptyNote>No check-ins in this range yet.</EmptyNote>
+          <EmptyNote>
+            No dose-linked peaks in this range yet.
+          </EmptyNote>
         ) : (
           <div className="mt-3 -ml-1">
             <ResponsiveContainer width="100%" height={230}>
@@ -192,10 +195,11 @@ export default function TrendCharts({
                   minTickGap={32}
                 />
                 <YAxis
-                  domain={[0, 10]}
-                  ticks={[0, 2, 4, 6, 8, 10]}
-                  width={28}
+                  domain={[0, "auto"]}
+                  allowDecimals={false}
+                  width={30}
                   tick={{ fill: "var(--muted)", fontSize: 11 }}
+                  tickFormatter={(h: number) => `${h}h`}
                   axisLine={false}
                   tickLine={false}
                 />
@@ -205,7 +209,7 @@ export default function TrendCharts({
                 />
                 <Line
                   type="monotone"
-                  dataKey="effectiveness"
+                  dataKey="hours"
                   stroke="var(--series-1)"
                   strokeWidth={2}
                   dot={{
@@ -221,25 +225,27 @@ export default function TrendCharts({
             </ResponsiveContainer>
           </div>
         )}
+        {unlinked > 0 && (
+          <p className="mt-2 text-xs text-muted">
+            {unlinked} peak{unlinked === 1 ? "" : "s"} not linked to a dose,
+            so not shown here.
+          </p>
+        )}
       </section>
 
-      {/* Time course after a dose */}
+      {/* Distribution of time to peak */}
       <section className="rounded-2xl border border-grid bg-card p-4">
-        <h2 className="text-sm font-semibold">
-          Average effectiveness by hours after dose
-        </h2>
+        <h2 className="text-sm font-semibold">How long it usually takes</h2>
         <p className="text-xs text-muted">
-          Linked check-ins only. Shows when a dose kicks in and wears off.
+          Number of peaks by hours after the dose.
         </p>
-        {linkedCount === 0 ? (
-          <EmptyNote>
-            No dose-linked check-ins in this range yet.
-          </EmptyNote>
+        {timeline.length === 0 ? (
+          <EmptyNote>Nothing to summarise in this range yet.</EmptyNote>
         ) : (
           <div className="mt-3 -ml-1">
             <ResponsiveContainer width="100%" height={200}>
               <BarChart
-                data={course}
+                data={buckets}
                 margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
               >
                 <CartesianGrid stroke="var(--grid)" vertical={false} />
@@ -252,19 +258,18 @@ export default function TrendCharts({
                   tickFormatter={(h: number) => `${h}h`}
                 />
                 <YAxis
-                  domain={[0, 10]}
-                  ticks={[0, 2, 4, 6, 8, 10]}
+                  allowDecimals={false}
                   width={28}
                   tick={{ fill: "var(--muted)", fontSize: 11 }}
                   axisLine={false}
                   tickLine={false}
                 />
                 <Tooltip
-                  content={<CourseTip />}
+                  content={<BucketTip />}
                   cursor={{ fill: "var(--grid)", fillOpacity: 0.5 }}
                 />
                 <Bar
-                  dataKey="avg"
+                  dataKey="count"
                   fill="var(--series-1)"
                   radius={[4, 4, 0, 0]}
                   maxBarSize={14}
@@ -286,24 +291,22 @@ export default function TrendCharts({
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-xs text-muted">
-                  <th className="py-1 pr-3 font-medium">When</th>
-                  <th className="py-1 pr-3 font-medium">Effect</th>
+                  <th className="py-1 pr-3 font-medium">Peak</th>
                   <th className="py-1 font-medium">After dose</th>
                 </tr>
               </thead>
               <tbody className="tabular-nums">
-                {[...inRange].reverse().map((c) => {
-                  const hoursSince = c.doseTakenAt
-                    ? (new Date(c.recordedAt).getTime() -
-                        new Date(c.doseTakenAt).getTime()) /
+                {[...inRange].reverse().map((peak) => {
+                  const hours = peak.doseTakenAt
+                    ? (new Date(peak.peakAt).getTime() -
+                        new Date(peak.doseTakenAt).getTime()) /
                       HOUR_MS
                     : null;
                   return (
-                    <tr key={c.id} className="border-t border-grid">
-                      <td className="py-1.5 pr-3">{fmtDateTime(c.recordedAt)}</td>
-                      <td className="py-1.5 pr-3">{c.effectiveness}/10</td>
+                    <tr key={peak.id} className="border-t border-grid">
+                      <td className="py-1.5 pr-3">{fmtDateTime(peak.peakAt)}</td>
                       <td className="py-1.5 text-ink-2">
-                        {hoursSince == null ? "—" : `${hoursSince.toFixed(1)} h`}
+                        {hours == null || hours < 0 ? "—" : fmtDuration(hours)}
                       </td>
                     </tr>
                   );
@@ -329,7 +332,7 @@ function StatTile({
   return (
     <div className="rounded-2xl border border-grid bg-card p-3">
       <p className="text-xs text-muted">{label}</p>
-      <p className="mt-0.5 text-2xl font-semibold">{value}</p>
+      <p className="mt-0.5 text-xl font-semibold">{value}</p>
       {sub && <p className="mt-0.5 text-[11px] leading-tight">{sub}</p>}
     </div>
   );
@@ -347,27 +350,22 @@ function TimelineTip({ active, payload }: any) {
     <div className="rounded-lg border border-grid bg-card px-3 py-2 text-xs shadow-sm">
       <p className="text-muted">{fmtDateTime(new Date(point.t).toISOString())}</p>
       <p className="font-semibold text-ink">
-        Effectiveness {point.effectiveness}/10
+        {fmtDuration(point.hours)} after dose
       </p>
-      {point.hoursSince != null && (
-        <p className="text-ink-2">{point.hoursSince.toFixed(1)} h after dose</p>
-      )}
     </div>
   );
 }
 
-function CourseTip({ active, payload }: any) {
+function BucketTip({ active, payload }: any) {
   if (!active || !payload?.length) return null;
-  const bucket = payload[0].payload as { hour: number; avg: number | null; n: number };
-  if (bucket.avg == null) return null;
+  const bucket = payload[0].payload as { hour: number; count: number };
   return (
     <div className="rounded-lg border border-grid bg-card px-3 py-2 text-xs shadow-sm">
       <p className="text-muted">
         {bucket.hour}–{bucket.hour + 1} h after dose
       </p>
-      <p className="font-semibold text-ink">Avg {bucket.avg.toFixed(1)}/10</p>
-      <p className="text-ink-2">
-        {bucket.n} check-in{bucket.n === 1 ? "" : "s"}
+      <p className="font-semibold text-ink">
+        {bucket.count} peak{bucket.count === 1 ? "" : "s"}
       </p>
     </div>
   );

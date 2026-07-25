@@ -5,19 +5,18 @@ export type Dose = {
   notes: string | null;
 };
 
-export type CheckIn = {
+export type Peak = {
   id: number;
   doseId: number | null;
-  recordedAt: string; // ISO timestamp
-  effectiveness: number; // 0-10
+  peakAt: string; // ISO timestamp — when the peak happened
+  recordedAt: string; // ISO timestamp — when it was logged
   sideEffects: string | null;
   notes: string | null;
 };
 
-export type TrendCheckIn = {
+export type TrendPeak = {
   id: number;
-  recordedAt: string;
-  effectiveness: number;
+  peakAt: string;
   doseTakenAt: string | null;
 };
 

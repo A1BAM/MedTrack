@@ -1,5 +1,5 @@
 import { neon, type NeonQueryFunction } from "@neondatabase/serverless";
-import type { CheckIn, Dose } from "./types";
+import type { Dose, Peak } from "./types";
 
 let client: NeonQueryFunction<false, false> | null = null;
 
@@ -30,12 +30,12 @@ export function mapDose(row: Record<string, any>): Dose {
   };
 }
 
-export function mapCheckIn(row: Record<string, any>): CheckIn {
+export function mapPeak(row: Record<string, any>): Peak {
   return {
     id: Number(row.id),
     doseId: row.dose_id == null ? null : Number(row.dose_id),
+    peakAt: toIso(row.peak_at),
     recordedAt: toIso(row.recorded_at),
-    effectiveness: Number(row.effectiveness),
     sideEffects: row.side_effects ?? null,
     notes: row.notes ?? null,
   };
@@ -51,7 +51,7 @@ export function friendlyDbError(error: unknown): string {
     return "DATABASE_URL is not set. Add your Neon connection string to .env.local (locally) or as a Cloudflare Worker secret — see the README.";
   }
   if (message.includes("does not exist")) {
-    return "The database tables are missing. Run `npm run migrate` once against your Neon database — see the README.";
+    return "The database is missing the latest tables or columns. Run `npm run migrate`, or paste the newest file in migrations/ into the Neon SQL editor — see the README.";
   }
   return `Database error: ${message}`;
 }
