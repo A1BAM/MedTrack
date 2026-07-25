@@ -7,11 +7,13 @@ import {
   CartesianGrid,
   ComposedChart,
   Line,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
+import { TYPICAL_DURATION_HOURS } from "@/lib/config";
 import { fmtDateTime, fmtDuration, fmtDurationShort } from "@/lib/format";
 import type { Dose, TrendPeak } from "@/lib/types";
 
@@ -94,11 +96,24 @@ export default function TrendCharts({
       if (avgPrior != null) delta = avgNow - avgPrior;
     }
 
-    const buckets = Array.from({ length: MAX_HOURS }, (_, hour) => ({
+    // Keep the histogram tight around a short-acting medication, but widen it
+    // if peaks actually land later than the typical duration.
+    const observedMax = timeline.reduce((max, p) => Math.max(max, p.hours), 0);
+    const bucketCount = Math.min(
+      MAX_HOURS,
+      Math.max(
+        Math.ceil(TYPICAL_DURATION_HOURS) + 2,
+        Math.ceil(observedMax) + 1
+      )
+    );
+    const buckets = Array.from({ length: bucketCount }, (_, hour) => ({
       hour,
       count: 0,
     }));
-    for (const point of timeline) buckets[Math.floor(point.hours)].count += 1;
+    for (const point of timeline) {
+      const bucket = buckets[Math.floor(point.hours)];
+      if (bucket) bucket.count += 1;
+    }
 
     return { days, inRange, dosesInRange, timeline, unlinked, avgNow, delta, buckets };
   }, [peaks, doses, range]);
@@ -195,7 +210,14 @@ export default function TrendCharts({
                   minTickGap={32}
                 />
                 <YAxis
-                  domain={[0, "auto"]}
+                  domain={[
+                    0,
+                    (dataMax: number) =>
+                      Math.max(
+                        Math.ceil(dataMax),
+                        Math.ceil(TYPICAL_DURATION_HOURS) + 1
+                      ),
+                  ]}
                   allowDecimals={false}
                   width={30}
                   tick={{ fill: "var(--muted)", fontSize: 11 }}
@@ -206,6 +228,17 @@ export default function TrendCharts({
                 <Tooltip
                   content={<TimelineTip />}
                   cursor={{ stroke: "var(--axis)", strokeDasharray: "3 3" }}
+                />
+                <ReferenceLine
+                  y={TYPICAL_DURATION_HOURS}
+                  stroke="var(--axis)"
+                  strokeDasharray="4 4"
+                  label={{
+                    value: `wears off ~${TYPICAL_DURATION_HOURS} h`,
+                    position: "insideTopLeft",
+                    fill: "var(--muted)",
+                    fontSize: 10,
+                  }}
                 />
                 <Line
                   type="monotone"
@@ -237,7 +270,8 @@ export default function TrendCharts({
       <section className="rounded-2xl border border-grid bg-card p-4">
         <h2 className="text-sm font-semibold">How long it usually takes</h2>
         <p className="text-xs text-muted">
-          Number of peaks by hours after the dose.
+          Number of peaks by hours after the dose. The dashed line is the
+          typical {TYPICAL_DURATION_HOURS} h duration.
         </p>
         {timeline.length === 0 ? (
           <EmptyNote>Nothing to summarise in this range yet.</EmptyNote>
@@ -246,7 +280,7 @@ export default function TrendCharts({
             <ResponsiveContainer width="100%" height={200}>
               <BarChart
                 data={buckets}
-                margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+                margin={{ top: 20, right: 8, left: 0, bottom: 0 }}
               >
                 <CartesianGrid stroke="var(--grid)" vertical={false} />
                 <XAxis
@@ -254,7 +288,7 @@ export default function TrendCharts({
                   tick={{ fill: "var(--muted)", fontSize: 11 }}
                   axisLine={{ stroke: "var(--axis)" }}
                   tickLine={false}
-                  interval={1}
+                  interval={buckets.length > 9 ? 1 : 0}
                   tickFormatter={(h: number) => `${h}h`}
                 />
                 <YAxis
@@ -267,6 +301,17 @@ export default function TrendCharts({
                 <Tooltip
                   content={<BucketTip />}
                   cursor={{ fill: "var(--grid)", fillOpacity: 0.5 }}
+                />
+                <ReferenceLine
+                  x={TYPICAL_DURATION_HOURS}
+                  stroke="var(--axis)"
+                  strokeDasharray="4 4"
+                  label={{
+                    value: `~${TYPICAL_DURATION_HOURS} h`,
+                    position: "top",
+                    fill: "var(--muted)",
+                    fontSize: 10,
+                  }}
                 />
                 <Bar
                   dataKey="count"

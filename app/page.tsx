@@ -1,8 +1,12 @@
 import Link from "next/link";
 import DoseForm from "@/components/DoseForm";
-import { LocalTime, TimeAgo } from "@/components/LocalTime";
+import { LocalTime, TimeAgo, WearOff } from "@/components/LocalTime";
 import SetupNotice from "@/components/SetupNotice";
-import { MED_NAME, TYPICAL_DOSE_MG } from "@/lib/config";
+import {
+  MED_NAME,
+  TYPICAL_DOSE_MG,
+  TYPICAL_DURATION_HOURS,
+} from "@/lib/config";
 import { db, friendlyDbError, mapDose } from "@/lib/db";
 import type { Dose } from "@/lib/types";
 
@@ -29,7 +33,10 @@ export default async function LogPage() {
     <main className="space-y-6">
       <header>
         <h1 className="text-2xl font-semibold">{MED_NAME}</h1>
-        <p className="text-sm text-ink-2">Typical dose {TYPICAL_DOSE_MG} mg</p>
+        <p className="text-sm text-ink-2">
+          Typical dose {TYPICAL_DOSE_MG} mg · lasts about{" "}
+          {TYPICAL_DURATION_HOURS} h
+        </p>
       </header>
 
       {dbError ? (
@@ -45,6 +52,12 @@ export default async function LogPage() {
                 <p className="mt-1 text-sm text-ink-2">
                   Last dose <TimeAgo iso={lastDose.takenAt} /> (
                   {lastDose.amount} mg)
+                </p>
+                <p className="text-sm text-muted">
+                  <WearOff
+                    iso={lastDose.takenAt}
+                    hours={TYPICAL_DURATION_HOURS}
+                  />
                 </p>
                 <ul className="mt-3 space-y-2">
                   {recent.map((dose) => (

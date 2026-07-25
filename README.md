@@ -92,9 +92,10 @@ Then configure, under **Settings → Variables and Secrets** (runtime):
 
 and under the **build** environment variables (Settings → Build):
 
-- `NEXT_PUBLIC_MED_NAME`, `NEXT_PUBLIC_TYPICAL_DOSE_MG` — these are baked
-  in during the build, so they must be visible to the build step. If unset,
-  the app falls back to "My medication" / 20 mg.
+- `NEXT_PUBLIC_MED_NAME`, `NEXT_PUBLIC_TYPICAL_DOSE_MG`,
+  `NEXT_PUBLIC_TYPICAL_DURATION_HOURS` — these are baked in during the
+  build, so they must be visible to the build step. If unset, the app falls
+  back to "My medication" / 10 mg / 4 h.
 
 ### Option B: from your machine
 
@@ -131,5 +132,8 @@ Migrations apply in filename order and are safe to re-run. `002_peaks.sql`
 replaced an earlier 0–10 effectiveness rating with `peak_at` and renamed
 `check_ins` to `peaks`.
 
-The medication name and typical dose are env vars rather than a table, since
-the app tracks exactly one medication for one person.
+The medication name, typical dose, and typical duration are env vars rather
+than a table, since the app tracks exactly one medication for one person.
+The duration is never stored against a dose or peak — it's used only as a
+reference: the expected wear-off time on the Log screen, and the dashed
+marker line on both trend charts.
