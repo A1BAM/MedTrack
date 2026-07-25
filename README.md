@@ -75,28 +75,40 @@ npm run dev
 
 ## 3. Deploy to Cloudflare Workers
 
+### Option A: git-connected (Workers Builds)
+
+Connect the repo in the Cloudflare dashboard (**Workers & Pages → Create →
+connect to Git**). The default settings work as-is:
+
+- Build command: `npm run build` (this runs the full OpenNext build — it
+  produces both the Next.js output and the `.open-next` Worker bundle)
+- Deploy command: `npx wrangler deploy`
+
+Then configure, under **Settings → Variables and Secrets** (runtime):
+
+- `DATABASE_URL`, `APP_PASSWORD`, `SESSION_SECRET` — add each as **Secret**
+
+and under the **build** environment variables (Settings → Build):
+
+- `NEXT_PUBLIC_MED_NAME`, `NEXT_PUBLIC_TYPICAL_DOSE_MG` — these are baked
+  in during the build, so they must be visible to the build step. If unset,
+  the app falls back to "My medication" / 20 mg.
+
+### Option B: from your machine
+
 ```bash
 npx wrangler login   # once
 npm run deploy       # builds with OpenNext and deploys the Worker
-```
-
-Then set the three secrets on the deployed Worker (they live on Cloudflare,
-not in the repo):
-
-```bash
 npx wrangler secret put DATABASE_URL
 npx wrangler secret put APP_PASSWORD
 npx wrangler secret put SESSION_SECRET
 ```
 
-Dashboard alternative: **Workers & Pages → medtrack → Settings → Variables
-and Secrets → Add → Secret**.
+With this flow the `NEXT_PUBLIC_*` values are read from `.env.local` at
+build time.
 
 Notes:
 
-- The `NEXT_PUBLIC_*` name/dose values are baked in at build time from
-  `.env.local` on the machine running `npm run deploy` — they don't need to
-  be Worker secrets.
 - `npm run preview` runs the real Workers runtime locally; it reads secrets
   from a `.dev.vars` file (copy `.dev.vars.example`, it's gitignored).
 - The migration runs from your machine (`npm run migrate`), not from the
