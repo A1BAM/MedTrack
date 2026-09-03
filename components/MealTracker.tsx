@@ -272,7 +272,7 @@ export default function MealTracker() {
         protein floor {PROTEIN_FLOOR_G} g
         <br />
         Uncheck anything you skip, then add what you ate instead. Everything
-        here clears itself at midnight Eastern.
+        here clears itself at midnight.
         <br />
         <button
           type="button"
