@@ -124,7 +124,7 @@ export default function TrendCharts({
         {[0, 1, 2].map((n) => (
           <div
             key={n}
-            className="h-40 animate-pulse rounded-2xl border border-grid bg-card"
+            className="h-40 animate-pulse rounded-[20px] border border-grid bg-card"
           />
         ))}
       </div>
@@ -135,12 +135,12 @@ export default function TrendCharts({
     view;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4.5">
       {/* Filter row — one row, above the charts */}
       <div
         role="group"
         aria-label="Date range"
-        className="grid grid-cols-4 gap-1 rounded-xl border border-grid bg-card p-1"
+        className="grid grid-cols-4 gap-1 rounded-[16px] border border-grid bg-card p-1"
       >
         {RANGES.map((r) => (
           <button
@@ -148,8 +148,8 @@ export default function TrendCharts({
             type="button"
             aria-pressed={range === r.key}
             onClick={() => setRange(r.key)}
-            className={`h-9 rounded-lg text-sm font-medium transition ${
-              range === r.key ? "bg-accent text-white" : "text-ink-2"
+            className={`h-[38px] rounded-[12px] text-[13.5px] font-medium transition ${
+              range === r.key ? "bg-accent text-on-accent" : "text-ink-2"
             }`}
           >
             {r.label}
@@ -158,7 +158,7 @@ export default function TrendCharts({
       </div>
 
       {/* Stat tiles */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-2.5">
         <StatTile
           label="Avg to peak"
           value={avgNow == null ? "—" : fmtDurationShort(avgNow)}
@@ -176,9 +176,9 @@ export default function TrendCharts({
       </div>
 
       {/* Time to peak over time */}
-      <section className="rounded-2xl border border-grid bg-card p-4">
-        <h2 className="text-sm font-semibold">Time to peak</h2>
-        <p className="text-xs text-muted">
+      <section className="rounded-[20px] border border-grid bg-card p-[18px]">
+        <h2 className="eyebrow">Time to peak</h2>
+        <p className="mt-1 text-xs leading-relaxed text-muted">
           Hours from dose to peak, one point per logged peak.
         </p>
         {timeline.length === 0 ? (
@@ -267,8 +267,8 @@ export default function TrendCharts({
       </section>
 
       {/* Distribution of time to peak */}
-      <section className="rounded-2xl border border-grid bg-card p-4">
-        <h2 className="text-sm font-semibold">How long it usually takes</h2>
+      <section className="rounded-[20px] border border-grid bg-card p-[18px]">
+        <h2 className="eyebrow">How long it usually takes</h2>
         <p className="text-xs text-muted">
           Number of peaks by hours after the dose. The dashed line is the
           typical {TYPICAL_DURATION_HOURS} h duration.
@@ -328,8 +328,8 @@ export default function TrendCharts({
 
       {/* Table view of the same data */}
       {inRange.length > 0 && (
-        <details className="rounded-2xl border border-grid bg-card p-4">
-          <summary className="cursor-pointer text-sm font-semibold">
+        <details className="rounded-[20px] border border-grid bg-card p-[18px]">
+          <summary className="eyebrow cursor-pointer">
             View as table
           </summary>
           <div className="mt-3 overflow-x-auto">
@@ -375,9 +375,9 @@ function StatTile({
   sub?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-grid bg-card p-3">
-      <p className="text-xs text-muted">{label}</p>
-      <p className="mt-0.5 text-xl font-semibold">{value}</p>
+    <div className="rounded-[16px] border border-grid bg-card p-[13px]">
+      <p className="eyebrow text-[10px] tracking-[0.07em]">{label}</p>
+      <p className="num mt-1 text-2xl leading-tight">{value}</p>
       {sub && <p className="mt-0.5 text-[11px] leading-tight">{sub}</p>}
     </div>
   );
@@ -392,7 +392,7 @@ function TimelineTip({ active, payload }: any) {
   if (!active || !payload?.length) return null;
   const point: TimelinePoint = payload[0].payload;
   return (
-    <div className="rounded-lg border border-grid bg-card px-3 py-2 text-xs shadow-sm">
+    <div className="rounded-[14px] border border-grid bg-card px-3 py-2 text-xs">
       <p className="text-muted">{fmtDateTime(new Date(point.t).toISOString())}</p>
       <p className="font-semibold text-ink">
         {fmtDuration(point.hours)} after dose
@@ -405,7 +405,7 @@ function BucketTip({ active, payload }: any) {
   if (!active || !payload?.length) return null;
   const bucket = payload[0].payload as { hour: number; count: number };
   return (
-    <div className="rounded-lg border border-grid bg-card px-3 py-2 text-xs shadow-sm">
+    <div className="rounded-[14px] border border-grid bg-card px-3 py-2 text-xs">
       <p className="text-muted">
         {bucket.hour}–{bucket.hour + 1} h after dose
       </p>

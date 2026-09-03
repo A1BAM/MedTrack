@@ -15,12 +15,12 @@ export default function LoginForm() {
         autoComplete="current-password"
         placeholder="Password"
         aria-label="Password"
-        className="h-12 w-full rounded-xl border border-grid bg-card px-4 text-base"
+        className="h-13 w-full rounded-[16px] border border-grid bg-card px-4 text-base"
       />
       <button
         type="submit"
         disabled={pending}
-        className="h-12 w-full rounded-xl bg-accent text-base font-semibold text-white transition active:scale-[0.98] disabled:opacity-60"
+        className="h-13 w-full rounded-[16px] bg-accent text-base font-medium text-on-accent transition active:scale-[0.98] disabled:opacity-60"
       >
         {pending ? "Checking…" : "Unlock"}
       </button>

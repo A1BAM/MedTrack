@@ -30,10 +30,10 @@ export default async function TrendsPage() {
   }
 
   return (
-    <main className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">Trends</h1>
-        <p className="text-sm text-ink-2">
+    <main className="space-y-7">
+      <header className="space-y-1.5">
+        <h1 className="screen-title">Trends</h1>
+        <p className="text-[13.5px] leading-relaxed text-ink-2">
           How long the medication takes to peak.
         </p>
       </header>

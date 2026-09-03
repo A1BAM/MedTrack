@@ -14,8 +14,8 @@ export default async function LoginPage() {
   return (
     <main className="flex min-h-[70dvh] flex-col justify-center space-y-6">
       <header className="text-center">
-        <h1 className="text-2xl font-semibold">{MED_NAME}</h1>
-        <p className="mt-1 text-sm text-ink-2">
+        <h1 className="screen-title">{MED_NAME}</h1>
+        <p className="mt-2 text-[13.5px] text-ink-2">
           Private tracker — enter your password to continue.
         </p>
       </header>

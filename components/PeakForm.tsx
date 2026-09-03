@@ -68,7 +68,7 @@ export default function PeakForm({
       <button
         type="submit"
         disabled={pending || (!!time && !peakAtIso)}
-        className="h-20 w-full rounded-2xl bg-accent text-xl font-semibold text-white shadow-sm transition active:scale-[0.98] disabled:opacity-60"
+        className="h-[86px] w-full rounded-[24px] bg-accent text-[18px] font-medium text-on-accent transition active:scale-[0.98] disabled:opacity-60"
       >
         {pending
           ? "Saving…"
@@ -96,20 +96,20 @@ export default function PeakForm({
       <button
         type="button"
         onClick={() => setAdjustOpen((open) => !open)}
-        className="text-sm text-ink-2 underline underline-offset-2"
+        className="text-[13.5px] text-ink-2 underline decoration-axis underline-offset-[3px]"
       >
         {adjustOpen ? "Hide options" : "Different time, dose, or notes?"}
       </button>
 
       {adjustOpen && (
-        <div className="space-y-3 rounded-xl border border-grid bg-card p-4">
-          <label className="block text-sm font-medium">
+        <div className="space-y-3.5 rounded-[20px] border border-grid bg-card p-[18px]">
+          <label className="block text-[13px] font-medium text-ink-2">
             Time it peaked
             <input
               type="datetime-local"
               value={time}
               onChange={(e) => setTime(e.target.value)}
-              className="mt-1 h-11 w-full rounded-lg border border-grid bg-page px-3 text-base"
+              className="mt-1.5 h-11 w-full rounded-[14px] border border-grid bg-page px-3.5 text-base"
             />
             <span className="mt-1 block text-xs font-normal text-muted">
               Leave empty to use the current time.
@@ -117,7 +117,7 @@ export default function PeakForm({
           </label>
 
           <div>
-            <label className="text-sm font-medium" htmlFor="link-select">
+            <label className="text-[13px] font-medium text-ink-2" htmlFor="link-select">
               Linked dose
             </label>
             {mounted ? (
@@ -125,7 +125,7 @@ export default function PeakForm({
                 id="link-select"
                 value={linkMode}
                 onChange={(e) => setLinkMode(e.target.value)}
-                className="mt-1 h-11 w-full rounded-lg border border-grid bg-page px-3 text-base"
+                className="mt-1.5 h-11 w-full rounded-[14px] border border-grid bg-page px-3.5 text-base"
               >
                 <option value="auto">
                   {candidate
@@ -140,29 +140,29 @@ export default function PeakForm({
                 <option value="none">Don&rsquo;t link to a dose</option>
               </select>
             ) : (
-              <div className="mt-1 h-11 rounded-lg border border-grid bg-page" />
+              <div className="mt-1.5 h-11 rounded-[14px] border border-grid bg-page" />
             )}
           </div>
 
-          <label className="block text-sm font-medium">
+          <label className="block text-[13px] font-medium text-ink-2">
             Side effects
             <input
               type="text"
               value={sideEffects}
               onChange={(e) => setSideEffects(e.target.value)}
               placeholder="e.g. dry mouth, headache"
-              className="mt-1 h-11 w-full rounded-lg border border-grid bg-page px-3 text-base"
+              className="mt-1.5 h-11 w-full rounded-[14px] border border-grid bg-page px-3.5 text-base"
             />
           </label>
 
-          <label className="block text-sm font-medium">
+          <label className="block text-[13px] font-medium text-ink-2">
             Notes
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={2}
               placeholder="Anything else worth remembering"
-              className="mt-1 w-full rounded-lg border border-grid bg-page px-3 py-2 text-base"
+              className="mt-1.5 w-full rounded-[14px] border border-grid bg-page px-3.5 py-2.5 text-base"
             />
           </label>
         </div>

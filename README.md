@@ -12,9 +12,10 @@ separate API layer. Deploys to Cloudflare Workers via
 
 ## Screens
 
-- **Log** (home) — one big button that logs a dose at the current time with
-  your typical amount; expandable options for a different amount, a backdated
-  time, or notes.
+- **Log** (home) — greets you by the Eastern hour (morning / afternoon /
+  evening / night), then one big button that logs a dose at the current time
+  with your typical amount; expandable options for a different amount, a
+  backdated time, or notes.
 - **Peak** — one big button that records the peak at the current time, plus
   options for a different time, side effects, and notes. It shows how long
   after your dose the peak landed, and auto-links to the most recent dose
@@ -150,6 +151,23 @@ and it applies regardless of the phone's own timezone.
 The plan itself — target calories, protein floor, maintenance, the meal
 sections, and the quick-add list — is plain data at the top of `lib/meals.ts`;
 edit it there.
+
+## Look and feel
+
+One set of tokens in `app/globals.css` drives both themes: warm stone
+neutrals, a single eucalyptus accent, and clay for the alarm state (going
+over, deleting, errors). The values are oklch-derived and contrast-checked —
+ink 13.5:1 on the page, ink-2 5.6:1, muted 4.5:1 on a card, accent 4.9:1.
+Charts read the same variables, so dark mode swaps in one place.
+
+Two typefaces, self-hosted at build time via `next/font`: **Newsreader** for
+screen titles and every number the app reports (doses, hours to peak,
+calories), **Instrument Sans** at 400/500 for everything else. Three CSS
+classes carry those roles app-wide — `.screen-title`, `.eyebrow`, `.num`.
+
+The mockups this came from are in `design/`: `build-artboards.mjs` generates
+the `.dc.html` artboards from one shared token system, and `palette.mjs`
+prints the palette with its contrast ratios.
 
 The medication name, typical dose, and typical duration are env vars rather
 than a table, since the app tracks exactly one medication for one person.

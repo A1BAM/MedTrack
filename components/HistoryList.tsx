@@ -69,7 +69,7 @@ export default function HistoryList({
         {[0, 1, 2].map((n) => (
           <div
             key={n}
-            className="h-20 animate-pulse rounded-xl border border-grid bg-card"
+            className="h-20 animate-pulse rounded-[20px] border border-grid bg-card"
           />
         ))}
       </div>
@@ -78,7 +78,7 @@ export default function HistoryList({
 
   if (groups.length === 0) {
     return (
-      <p className="rounded-xl border border-grid bg-card p-4 text-sm text-ink-2">
+      <p className="rounded-[20px] border border-grid bg-card p-[18px] text-[13.5px] text-ink-2">
         Nothing logged yet. Log your first dose from the Log tab.
       </p>
     );
@@ -88,7 +88,7 @@ export default function HistoryList({
     <div className="space-y-6">
       {groups.map((group) => (
         <section key={group.heading}>
-          <h2 className="mb-2 text-sm font-semibold text-ink-2">
+          <h2 className="eyebrow mb-2.5">
             {group.heading}
           </h2>
           <div className="space-y-3">
@@ -141,16 +141,16 @@ function DoseCard({
 
   return (
     <article
-      className={`rounded-xl border border-grid bg-card p-3 ${busy ? "opacity-50" : ""}`}
+      className={`space-y-2.5 rounded-[20px] border border-grid bg-card p-4 ${busy ? "opacity-50" : ""}`}
     >
       <div className="flex items-center justify-between gap-2">
         <p>
-          <span className="font-semibold">{dose.amount} mg</span>{" "}
-          <span className="text-sm text-ink-2">· {fmtTime(dose.takenAt)}</span>
+          <span className="num text-[18px]">{dose.amount} mg</span>{" "}
+          <span className="text-[13.5px] text-ink-2">{fmtTime(dose.takenAt)}</span>
         </p>
         <DeleteButton onClick={remove} label="Delete dose" />
       </div>
-      {dose.notes && <p className="mt-1 text-sm text-ink-2">{dose.notes}</p>}
+      {dose.notes && <p className="text-[13.5px] text-ink-2">{dose.notes}</p>}
       {linked.map((peak) => (
         <PeakCard key={peak.id} peak={peak} doses={doses} dose={dose} />
       ))}
@@ -206,18 +206,18 @@ function PeakCard({
     <div
       className={`${
         standalone
-          ? "rounded-xl border border-grid bg-card p-3"
-          : "mt-2 rounded-lg border border-grid bg-page p-2.5"
+          ? "space-y-2.5 rounded-[20px] border border-grid bg-card p-4"
+          : "space-y-2.5 rounded-[14px] border border-grid bg-page p-3"
       } ${busy ? "opacity-50" : ""}`}
     >
       <div className="flex items-center justify-between gap-2">
         <p className="flex flex-wrap items-center gap-x-2">
-          <span className="inline-flex items-center rounded-full bg-accent/15 px-2 py-0.5 text-sm font-semibold">
+          <span className="inline-flex h-[26px] items-center rounded-full border border-accent px-[11px] text-[12.5px] font-medium text-accent">
             peak {fmtTime(peak.peakAt)}
           </span>
           {hoursAfter != null && hoursAfter >= 0 && (
-            <span className="text-sm text-ink-2">
-              {fmtDuration(hoursAfter)} after dose
+            <span className="text-[13px] text-ink-2">
+              <span className="num">{fmtDuration(hoursAfter)}</span> after dose
             </span>
           )}
         </p>
@@ -227,7 +227,7 @@ function PeakCard({
             onClick={() => setEditingLink((open) => !open)}
             aria-label="Change linked dose"
             title="Change linked dose"
-            className="rounded-md p-1.5 text-muted active:bg-grid"
+            className="rounded-[10px] p-1.5 text-muted active:bg-grid"
           >
             <svg
               viewBox="0 0 24 24"
@@ -247,21 +247,21 @@ function PeakCard({
         </div>
       </div>
       {standalone && (
-        <p className="mt-1 text-xs text-muted">Not linked to a dose</p>
+        <p className="text-xs text-muted">Not linked to a dose</p>
       )}
       {peak.sideEffects && (
-        <p className="mt-1 text-sm">
+        <p className="text-[13.5px]">
           <span className="text-muted">Side effects:</span> {peak.sideEffects}
         </p>
       )}
-      {peak.notes && <p className="mt-1 text-sm text-ink-2">{peak.notes}</p>}
+      {peak.notes && <p className="text-[13.5px] text-ink-2">{peak.notes}</p>}
       {editingLink && (
-        <div className="mt-2 flex items-center gap-2">
+        <div className="flex items-center gap-2">
           <select
             defaultValue={peak.doseId == null ? "none" : String(peak.doseId)}
             onChange={(e) => saveLink(e.target.value)}
             disabled={busy}
-            className="h-10 w-full rounded-lg border border-grid bg-card px-2 text-sm"
+            className="h-11 w-full rounded-[14px] border border-grid bg-card px-3 text-sm"
             aria-label="Linked dose"
           >
             <option value="none">No dose</option>
@@ -290,7 +290,7 @@ function DeleteButton({
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="rounded-md p-1.5 text-muted active:bg-grid"
+      className="rounded-[10px] p-1.5 text-muted active:bg-grid"
     >
       <svg
         viewBox="0 0 24 24"

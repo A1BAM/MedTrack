@@ -106,44 +106,44 @@ export default function MealTracker() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border border-grid bg-card p-4">
-        <div className="flex items-baseline justify-between text-xs text-muted">
-          <span suppressHydrationWarning>{heading || "Today"}</span>
-          <span>
+      <section className="rounded-[20px] border border-grid bg-card p-5">
+        <div className="flex items-baseline justify-between">
+          <span className="eyebrow" suppressHydrationWarning>{heading || "Today"}</span>
+          <span className="eyebrow text-accent">
             {t.kcal === 0
               ? "nothing logged yet"
               : `${(deficit / 500).toFixed(1)} lb/wk at this pace`}
           </span>
         </div>
 
-        <div className="mt-3 flex items-end gap-3">
+        <div className="mt-3.5 flex items-end gap-3.5">
           <span
-            className={`text-6xl leading-none font-semibold tabular-nums tracking-tight ${
+            className={`num text-[62px] leading-[0.85] ${
               over ? "text-danger" : "text-accent"
             }`}
           >
             {fmt(Math.abs(left))}
           </span>
           <span className="pb-1 text-sm">
-            <span className="block font-medium">
+            <span className="block text-[14.5px]">
               calories {over ? "over" : "left"}
             </span>
-            <span className="block text-ink-2">
-              <span className="tabular-nums">{fmt(t.kcal)}</span> eaten of{" "}
-              <span className="tabular-nums">{fmt(KCAL_TARGET)}</span>
+            <span className="block text-[13px] text-ink-2">
+              <span className="num">{fmt(t.kcal)}</span> of{" "}
+              <span className="num">{fmt(KCAL_TARGET)}</span> eaten
             </span>
           </span>
         </div>
 
-        <div className="mt-4 border-t border-grid pt-3">
+        <div className="mt-4.5 border-t border-grid pt-3.5">
           <div className="flex items-baseline justify-between text-sm">
-            <span className="font-medium">Protein</span>
-            <span className="text-ink-2 tabular-nums">
+            <span className="text-[14px]">Protein</span>
+            <span className="num text-[14px] text-ink-2">
               {fmt(t.protein)} of {PROTEIN_FLOOR_G} g
             </span>
           </div>
           <div
-            className="mt-2 h-2 overflow-hidden rounded-full bg-grid"
+            className="mt-2.5 h-[5px] overflow-hidden rounded-full bg-grid"
             role="progressbar"
             aria-label="Protein against the daily floor"
             aria-valuemin={0}
@@ -151,14 +151,14 @@ export default function MealTracker() {
             aria-valuenow={Math.round(t.protein)}
           >
             <div
-              className={`h-full transition-[width] duration-300 ${
+              className={`h-full rounded-full transition-[width] duration-300 ${
                 proteinDone ? "bg-good" : "bg-axis"
               }`}
               style={{ width: `${proteinPct}%` }}
             />
           </div>
           <p
-            className={`mt-2 text-xs ${proteinDone ? "text-good" : "text-muted"}`}
+            className={`mt-2.5 text-xs ${proteinDone ? "text-good" : "text-muted"}`}
           >
             {proteinDone
               ? "Cleared. Anything above this is free."
@@ -166,16 +166,16 @@ export default function MealTracker() {
           </p>
         </div>
 
-        <div className="mt-3 flex gap-5 border-t border-grid pt-3 text-xs text-ink-2">
+        <div className="mt-3.5 flex gap-5.5 border-t border-grid pt-3.5 text-xs text-muted">
           <span>
-            Carbs <b className="text-sm tabular-nums text-ink">{fmt(t.carbs)}</b>g
+            Carbs <b className="num text-[15px] font-normal text-ink">{fmt(t.carbs)}</b>g
           </span>
           <span>
-            Fat <b className="text-sm tabular-nums text-ink">{fmt(t.fat)}</b>g
+            Fat <b className="num text-[15px] font-normal text-ink">{fmt(t.fat)}</b>g
           </span>
           <span>
             Deficit{" "}
-            <b className="text-sm tabular-nums text-ink">{fmt(deficit)}</b>
+            <b className="num text-[15px] font-normal text-ink">{fmt(deficit)}</b>
           </span>
         </div>
       </section>
@@ -184,14 +184,10 @@ export default function MealTracker() {
         const sub = sectionKcal(section, checked);
         return (
           <section key={section.name}>
-            <div className="flex items-baseline justify-between border-b border-grid pb-2">
-              <h2 className="text-sm font-semibold text-ink-2">
-                {section.name}
-              </h2>
+            <div className="flex items-baseline justify-between border-b border-axis pb-2.5">
+              <h2 className="eyebrow">{section.name}</h2>
               <span
-                className={`text-xs tabular-nums ${
-                  sub ? "font-semibold text-accent" : "text-muted"
-                }`}
+                className={`num text-[12.5px] ${sub ? "text-accent" : "text-muted"}`}
               >
                 {sub ? `${fmt(sub)} kcal` : "—"}
               </span>
@@ -206,17 +202,17 @@ export default function MealTracker() {
                       role="checkbox"
                       aria-checked={on}
                       onClick={() => toggle(entry.id)}
-                      className="flex w-full items-center gap-3 py-3 text-left"
+                      className="flex h-[52px] w-full items-center gap-3.5 text-left"
                     >
                       <Check on={on} />
                       <span className={`flex-1 text-[15px] ${on ? "text-ink-2" : ""}`}>
                         {entry.label}
                       </span>
                       <span
-                        className={`text-sm tabular-nums ${on ? "text-ink-2" : "text-muted"}`}
+                        className={`num text-[15px] ${on ? "text-ink-2" : "text-ink"}`}
                       >
                         {fmt(entry.kcal)}
-                        <span className="text-xs"> · {fmt(entry.protein)}p</span>
+                        <span className="text-[12.5px] text-muted"> · {fmt(entry.protein)}p</span>
                       </span>
                     </button>
                   </li>
@@ -229,9 +225,9 @@ export default function MealTracker() {
 
       {extras.length > 0 && (
         <section>
-          <div className="flex items-baseline justify-between border-b border-grid pb-2">
-            <h2 className="text-sm font-semibold text-ink-2">Added</h2>
-            <span className="text-xs font-semibold tabular-nums text-accent">
+          <div className="flex items-baseline justify-between border-b border-axis pb-2.5">
+            <h2 className="eyebrow">Added</h2>
+            <span className="num text-[12.5px] text-accent">
               {fmt(extras.reduce((acc, extra) => acc + extra.kcal, 0))} kcal
             </span>
           </div>
@@ -239,15 +235,15 @@ export default function MealTracker() {
             {extras.map((extra) => (
               <li
                 key={extra.id}
-                className="flex items-center gap-3 border-b border-grid py-3 last:border-0"
+                className="flex h-[52px] items-center gap-3.5 border-b border-grid last:border-0"
               >
                 <Check on />
                 <span className="flex-1 text-[15px] text-ink-2">
                   {extra.label}
                 </span>
-                <span className="text-sm tabular-nums text-ink-2">
+                <span className="num text-[15px] text-ink-2">
                   {fmt(extra.kcal)}
-                  <span className="text-xs"> · {fmt(extra.protein)}p</span>
+                  <span className="text-[12.5px] text-muted"> · {fmt(extra.protein)}p</span>
                 </span>
                 <button
                   type="button"
@@ -266,12 +262,12 @@ export default function MealTracker() {
       <button
         type="button"
         onClick={() => dialogRef.current?.showModal()}
-        className="h-14 w-full rounded-2xl border border-accent text-base font-semibold text-accent transition active:scale-[0.98]"
+        className="h-[54px] w-full rounded-[18px] border border-accent text-[15px] font-medium text-accent transition active:scale-[0.98]"
       >
         Add something else
       </button>
 
-      <footer className="border-t border-grid pt-4 text-xs text-muted">
+      <footer className="border-t border-grid pt-4 text-xs leading-relaxed text-muted">
         Maintenance {fmt(MAINTENANCE_KCAL)} · target {fmt(KCAL_TARGET)} ·
         protein floor {PROTEIN_FLOOR_G} g
         <br />
@@ -281,7 +277,7 @@ export default function MealTracker() {
         <button
           type="button"
           onClick={clearToday}
-          className="mt-1 underline underline-offset-2"
+          className="mt-1.5 underline decoration-axis underline-offset-[3px]"
         >
           Clear today
         </button>
@@ -295,7 +291,7 @@ export default function MealTracker() {
 function Check({ on }: { on: boolean }) {
   return (
     <span
-      className={`grid h-[22px] w-[22px] flex-none place-items-center rounded-md border transition ${
+      className={`grid h-[21px] w-[21px] flex-none place-items-center rounded-[7px] border-[1.5px] transition ${
         on ? "border-accent bg-accent" : "border-axis"
       }`}
       aria-hidden
@@ -304,7 +300,7 @@ function Check({ on }: { on: boolean }) {
         viewBox="0 0 16 16"
         className={`h-3 w-3 transition ${on ? "opacity-100" : "opacity-0"}`}
         fill="none"
-        stroke="white"
+        stroke="var(--on-accent)"
         strokeWidth="2.6"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -362,18 +358,18 @@ function AddFoodDialog({
   };
 
   const field =
-    "mt-1 h-11 w-full rounded-lg border border-grid bg-page px-3 text-base";
+    "mt-1.5 h-11 w-full rounded-[14px] border border-grid bg-page px-3.5 text-base";
 
   return (
     <dialog
       ref={ref}
       onClose={close}
-      className="m-auto max-h-[85dvh] w-[92vw] max-w-sm overflow-y-auto rounded-2xl bg-card p-0 text-ink backdrop:bg-black/50"
+      className="m-auto max-h-[85dvh] w-[92vw] max-w-sm overflow-y-auto rounded-[22px] bg-card p-0 text-ink backdrop:bg-black/50"
     >
       <div className="space-y-4 p-5">
         <div>
-          <h2 className="text-lg font-semibold">Add food</h2>
-          <p className="text-sm text-ink-2">
+          <h2 className="screen-title text-[22px]">Add food</h2>
+          <p className="text-[13.5px] text-ink-2">
             Tap something you keep around, or type it in.
           </p>
         </div>
@@ -384,10 +380,10 @@ function AddFoodDialog({
               key={quick.label}
               type="button"
               onClick={() => addQuick(quick)}
-              className="rounded-lg border border-grid bg-page px-3 py-2 text-left text-[13px]"
+              className="rounded-[12px] border border-grid bg-page px-3 py-2.5 text-left text-[13px]"
             >
               <span className="font-medium">{quick.label}</span>{" "}
-              <span className="tabular-nums text-muted">{quick.kcal}</span>
+              <span className="num text-muted">{quick.kcal}</span>
             </button>
           ))}
         </div>
@@ -456,7 +452,7 @@ function AddFoodDialog({
           <button
             type="button"
             onClick={close}
-            className="h-12 flex-1 rounded-xl border border-grid text-sm font-semibold text-ink-2"
+            className="h-12 flex-1 rounded-[16px] border border-grid text-sm font-medium text-ink-2"
           >
             Cancel
           </button>
@@ -464,7 +460,7 @@ function AddFoodDialog({
             type="button"
             onClick={addTyped}
             disabled={!(Number(kcal) > 0)}
-            className="h-12 flex-1 rounded-xl bg-accent text-sm font-semibold text-white disabled:opacity-60"
+            className="h-12 flex-1 rounded-[16px] bg-accent text-sm font-medium text-on-accent disabled:opacity-60"
           >
             Add to today
           </button>

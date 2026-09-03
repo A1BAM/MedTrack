@@ -7,16 +7,14 @@ const TABS = [
   {
     href: "/",
     label: "Log",
-    icon: (
-      <path d="M12 5v14M5 12h14" strokeLinecap="round" />
-    ),
+    icon: <path d="M12 5.5v13M5.5 12h13" strokeLinecap="round" />,
   },
   {
     href: "/peak",
     label: "Peak",
     icon: (
       <path
-        d="M3 19h18L13.4 6.6a1.7 1.7 0 0 0-2.8 0L3 19z"
+        d="M3.5 18.5h17L13.2 6.4a1.5 1.5 0 0 0-2.4 0z"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -27,8 +25,8 @@ const TABS = [
     label: "History",
     icon: (
       <>
-        <circle cx="12" cy="12" r="8.5" />
-        <path d="M12 7.5V12l3 2" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="12" cy="12" r="8.4" />
+        <path d="M12 7.6V12l3 1.9" strokeLinecap="round" strokeLinejoin="round" />
       </>
     ),
   },
@@ -37,8 +35,8 @@ const TABS = [
     label: "Meals",
     icon: (
       <>
-        <path d="M7 2v20M4 2v5a3 3 0 0 0 6 0V2" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M17 22V2.5c2 1.4 3.2 3.8 3.2 6.5 0 2.6-1.2 4.6-3.2 5.3" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M7 3v18M4.2 3v4.6a2.8 2.8 0 0 0 5.6 0V3" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M16.8 21V3.4c1.9 1.3 3 3.6 3 6.2 0 2.5-1.1 4.4-3 5.1" strokeLinecap="round" strokeLinejoin="round" />
       </>
     ),
   },
@@ -46,7 +44,7 @@ const TABS = [
     href: "/trends",
     label: "Trends",
     icon: (
-      <path d="M4 17l5-5 3.5 3.5L20 9m0 0h-4.5M20 9v4.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M4 16.5l5-5 3.3 3.3L20 7.5m0 0h-4.3M20 7.5v4.3" strokeLinecap="round" strokeLinejoin="round" />
     ),
   },
 ];
@@ -67,20 +65,26 @@ export default function BottomNav() {
               key={tab.href}
               href={tab.href}
               aria-current={active ? "page" : undefined}
-              className={`flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-medium ${
+              className={`flex h-[74px] flex-col items-center justify-center gap-1.5 text-[10.5px] font-medium ${
                 active ? "text-accent" : "text-muted"
               }`}
             >
-              <svg
-                viewBox="0 0 24 24"
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                aria-hidden
+              <span
+                className={`flex h-[30px] w-[54px] items-center justify-center rounded-full transition ${
+                  active ? "bg-wash" : ""
+                }`}
               >
-                {tab.icon}
-              </svg>
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-[23px] w-[23px]"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  aria-hidden
+                >
+                  {tab.icon}
+                </svg>
+              </span>
               {tab.label}
             </Link>
           );
