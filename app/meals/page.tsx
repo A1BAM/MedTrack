@@ -8,7 +8,7 @@ export default function MealsPage() {
       <header>
         <h1 className="text-2xl font-semibold">Meals</h1>
         <p className="text-sm text-ink-2">
-          Check off what you actually ate. Resets at midnight Eastern — nothing
+          Check off what you actually ate. Resets at midnight — nothing
           is saved beyond today.
         </p>
       </header>
