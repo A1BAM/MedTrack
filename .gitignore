@@ -27,3 +27,6 @@ cloudflare-env.d.ts
 
 # misc
 .DS_Store
+
+# design: the seeded canvas is 2.5 MB of bundled editor, regenerate with seed-canvas.mjs
+design/medtrack-redesign.html

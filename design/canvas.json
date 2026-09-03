@@ -1,0 +1,103 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Log"
+    },
+    {
+      "file": "LogDark.dc.html",
+      "x": 470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Log \u2014 dark"
+    },
+    {
+      "file": "Peak.dc.html",
+      "x": 940,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Peak \u2014 dark"
+    },
+    {
+      "file": "History.dc.html",
+      "x": 1410,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "History"
+    },
+    {
+      "file": "Meals.dc.html",
+      "x": 0,
+      "y": 964,
+      "w": 390,
+      "h": 960,
+      "title": "Meals"
+    },
+    {
+      "file": "MealsEnd.dc.html",
+      "x": 470,
+      "y": 964,
+      "w": 390,
+      "h": 1220,
+      "title": "Meals, continued \u2014 dark"
+    },
+    {
+      "file": "Trends.dc.html",
+      "x": 940,
+      "y": 964,
+      "w": 390,
+      "h": 965,
+      "title": "Trends"
+    },
+    {
+      "file": "Foundations.dc.html",
+      "x": 1410,
+      "y": 964,
+      "w": 880,
+      "h": 1180,
+      "title": "Foundations"
+    },
+    {
+      "file": "DirectionClay.dc.html",
+      "x": 0,
+      "y": 2304,
+      "w": 390,
+      "h": 540,
+      "title": "Alternate \u2014 warm clay"
+    },
+    {
+      "file": "DirectionMist.dc.html",
+      "x": 470,
+      "y": 2304,
+      "w": 390,
+      "h": 540,
+      "title": "Alternate \u2014 quiet blue"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note-screens",
+      "x": -320,
+      "y": 40,
+      "w": 240,
+      "text": "All five screens, redrawn.\n\nLog appears twice so you can hold light and dark side by side; Peak and the bottom of Meals are dark too.\n\nThe copy and numbers are the app's real ones."
+    },
+    {
+      "id": "note-alts",
+      "x": -320,
+      "y": 2340,
+      "w": 240,
+      "text": "Two alternate accents on the same layout, if eucalyptus isn't it.\n\nAll three sit at identical lightness and chroma \u2014 only the hue moves \u2014 so any of them drops in without re-tuning anything else."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}

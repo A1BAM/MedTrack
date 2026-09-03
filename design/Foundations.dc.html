@@ -1,0 +1,266 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..600&amp;family=Newsreader:opsz,wght@6..72,300..500&amp;display=swap">
+  <style>
+    :root{
+      --page:#F4F1EC; --surface:#FCFBF8; --ink:#282521; --ink-2:#645F59;
+      --muted:#78736D; --grid:#DFDBD5; --axis:#C2BEB7; --accent:#447260;
+      --wash:#DCECE5; --good:#447260; --danger:#9F5342; --on-accent:#FCFBF8;
+      --ui:'Instrument Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+      --display:'Newsreader',Georgia,'Times New Roman',serif;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--page);color:var(--ink);font-family:var(--ui);
+      font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+    a{color:var(--accent);text-decoration:none} a:hover{color:var(--ink)}
+    p,h1,h2,h3{margin:0}
+    .num{font-family:var(--display);font-variant-numeric:tabular-nums;font-weight:400}
+
+    .screen{position:relative;width:390px;min-height:100%;background:var(--page);
+      display:flex;flex-direction:column;overflow:hidden}
+    .body{flex-grow:1;display:flex;flex-direction:column;gap:26px;padding:30px 20px 108px}
+    .head{display:flex;flex-direction:column;gap:7px}
+    h1{font-family:var(--display);font-size:29px;line-height:1.1;font-weight:400;letter-spacing:-0.01em}
+    .sub{font-size:13.5px;line-height:1.5;color:var(--ink-2)}
+    .eyebrow{font-size:10.5px;font-weight:600;letter-spacing:0.11em;text-transform:uppercase;color:var(--muted)}
+
+    .card{background:var(--surface);border:1px solid var(--grid);border-radius:20px;padding:18px}
+    .stack{display:flex;flex-direction:column}
+    .rowx{display:flex;align-items:center}
+
+    .cta{height:86px;border-radius:24px;background:var(--accent);color:var(--on-accent);
+      font-family:var(--ui);font-size:18px;font-weight:500;letter-spacing:0.005em;
+      display:flex;align-items:center;justify-content:center;gap:11px;border:none;width:100%}
+    .ghost{height:54px;border-radius:18px;background:transparent;color:var(--accent);
+      border:1px solid var(--accent);font-family:var(--ui);font-size:15px;font-weight:500;
+      display:flex;align-items:center;justify-content:center;gap:9px;width:100%}
+    .quiet{font-size:13.5px;color:var(--ink-2);text-decoration:underline;
+      text-decoration-color:var(--axis);text-underline-offset:3px}
+
+    .divide{border-top:1px solid var(--grid)}
+    .chip{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 11px;
+      border-radius:999px;border:1px solid var(--accent);color:var(--accent);
+      font-size:12.5px;font-weight:500;letter-spacing:0.01em}
+
+    .tabbar{position:absolute;left:0;right:0;bottom:0;height:84px;background:var(--surface);
+      border-top:1px solid var(--grid);display:grid;grid-template-columns:repeat(5,1fr);
+      align-items:start;padding-top:10px}
+    .tab{display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--muted);
+      font-size:10.5px;font-weight:500;letter-spacing:0.01em}
+    .tab .pill{width:54px;height:30px;border-radius:999px;display:flex;align-items:center;
+      justify-content:center}
+    .tab.on{color:var(--accent)} .tab.on .pill{background:var(--wash)}
+
+    .mrow{display:flex;align-items:center;gap:13px;height:52px;border-bottom:1px solid var(--grid)}
+    .box{width:21px;height:21px;flex:none;border-radius:7px;border:1.5px solid var(--axis);
+      display:flex;align-items:center;justify-content:center}
+    .box.on{background:var(--accent);border-color:var(--accent)}
+    .track{height:5px;border-radius:999px;background:var(--grid);overflow:hidden}
+    .fill{height:100%;background:var(--accent);border-radius:999px}
+  </style>
+</helmet>
+<div style="width:880px;min-height:100%;background:var(--page);color:var(--ink);font-family:var(--ui);padding:36px 40px 44px;display:flex;flex-direction:column;gap:34px">
+  <div class="stack" style="gap:7px">
+    <h1 style="font-size:32px">Foundations</h1>
+    <p class="sub" style="max-width:60ch">Warm stone neutrals, one eucalyptus accent, clay for the alarm state. Every value is oklch-derived and contrast-checked, and drops straight into the <span class="num">:root</span> block in <span class="num">app/globals.css</span>.</p>
+  </div>
+
+
+  <div class="stack" style="gap:9px">
+    <span class="eyebrow">Light</span>
+    <div style="display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:8px">
+      <div class="stack" style="gap:5px">
+        <span style="height:52px;border-radius:12px;background:#F4F1EC;border:1px solid #DFDBD5"></span>
+        <span style="font-size:10.5px;color:#645F59">page</span>
+        <span class="num" style="font-size:10.5px;color:#78736D">#F4F1EC</span>
+      </div>
+      <div class="stack" style="gap:5px">
+        <span style="height:52px;border-radius:12px;background:#FCFBF8;border:1px solid #DFDBD5"></span>
+        <span style="font-size:10.5px;color:#645F59">surface</span>
+        <span class="num" style="font-size:10.5px;color:#78736D">#FCFBF8</span>
+      </div>
+      <div class="stack" style="gap:5px">
+        <span style="height:52px;border-radius:12px;background:#DFDBD5;border:1px solid #DFDBD5"></span>
+        <span style="font-size:10.5px;color:#645F59">grid</span>
+        <span class="num" style="font-size:10.5px;color:#78736D">#DFDBD5</span>
+      </div>
+      <div class="stack" style="gap:5px">
+        <span style="height:52px;border-radius:12px;background:#78736D;border:1px solid #DFDBD5"></span>
+        <span style="font-size:10.5px;color:#645F59">muted</span>
+        <span class="num" style="font-size:10.5px;color:#78736D">#78736D</span>
+      </div>
+      <div class="stack" style="gap:5px">
+        <span style="height:52px;border-radius:12px;background:#645F59;border:1px solid #DFDBD5"></span>
+        <span style="font-size:10.5px;color:#645F59">ink-2</span>
+        <span class="num" style="font-size:10.5px;color:#78736D">#645F59</span>
+      </div>
+      <div class="stack" style="gap:5px">
+        <span style="height:52px;border-radius:12px;background:#282521;border:1px solid #DFDBD5"></span>
+        <span style="font-size:10.5px;color:#645F59">ink</span>
+        <span class="num" style="font-size:10.5px;color:#78736D">#282521</span>
+      </div>
+      <div class="stack" style="gap:5px">
+        <span style="height:52px;border-radius:12px;background:#447260;border:1px solid #DFDBD5"></span>
+        <span style="font-size:10.5px;color:#645F59">accent</span>
+        <span class="num" style="font-size:10.5px;color:#78736D">#447260</span>
+      </div>
+      <div class="stack" style="gap:5px">
+        <span style="height:52px;border-radius:12px;background:#DCECE5;border:1px solid #DFDBD5"></span>
+        <span style="font-size:10.5px;color:#645F59">wash</span>
+        <span class="num" style="font-size:10.5px;color:#78736D">#DCECE5</span>
+      </div>
+      <div class="stack" style="gap:5px">
+        <span style="height:52px;border-radius:12px;background:#9F5342;border:1px solid #DFDBD5"></span>
+        <span style="font-size:10.5px;color:#645F59">danger</span>
+        <span class="num" style="font-size:10.5px;color:#78736D">#9F5342</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stack" style="gap:9px">
+    <span class="eyebrow">Dark</span>
+    <div style="display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:8px">
+      <div class="stack" style="gap:5px">
+        <span style="height:52px;border-radius:12px;background:#141310;border:1px solid #312F2B"></span>
+        <span style="font-size:10.5px;color:#645F59">page</span>
+        <span class="num" style="font-size:10.5px;color:#78736D">#141310</span>
+      </div>
+      <div class="stack" style="gap:5px">
+        <span style="height:52px;border-radius:12px;background:#211E1B;border:1px solid #312F2B"></span>
+        <span style="font-size:10.5px;color:#645F59">surface</span>
+        <span class="num" style="font-size:10.5px;color:#78736D">#211E1B</span>
+      </div>
+      <div class="stack" style="gap:5px">
+        <span style="height:52px;border-radius:12px;background:#312F2B;border:1px solid #312F2B"></span>
+        <span style="font-size:10.5px;color:#645F59">grid</span>
+        <span class="num" style="font-size:10.5px;color:#78736D">#312F2B</span>
+      </div>
+      <div class="stack" style="gap:5px">
+        <span style="height:52px;border-radius:12px;background:#928F88;border:1px solid #312F2B"></span>
+        <span style="font-size:10.5px;color:#645F59">muted</span>
+        <span class="num" style="font-size:10.5px;color:#78736D">#928F88</span>
+      </div>
+      <div class="stack" style="gap:5px">
+        <span style="height:52px;border-radius:12px;background:#B9B5AF;border:1px solid #312F2B"></span>
+        <span style="font-size:10.5px;color:#645F59">ink-2</span>
+        <span class="num" style="font-size:10.5px;color:#78736D">#B9B5AF</span>
+      </div>
+      <div class="stack" style="gap:5px">
+        <span style="height:52px;border-radius:12px;background:#EFECE8;border:1px solid #312F2B"></span>
+        <span style="font-size:10.5px;color:#645F59">ink</span>
+        <span class="num" style="font-size:10.5px;color:#78736D">#EFECE8</span>
+      </div>
+      <div class="stack" style="gap:5px">
+        <span style="height:52px;border-radius:12px;background:#8BBEAA;border:1px solid #312F2B"></span>
+        <span style="font-size:10.5px;color:#645F59">accent</span>
+        <span class="num" style="font-size:10.5px;color:#78736D">#8BBEAA</span>
+      </div>
+      <div class="stack" style="gap:5px">
+        <span style="height:52px;border-radius:12px;background:#283731;border:1px solid #312F2B"></span>
+        <span style="font-size:10.5px;color:#645F59">wash</span>
+        <span class="num" style="font-size:10.5px;color:#78736D">#283731</span>
+      </div>
+      <div class="stack" style="gap:5px">
+        <span style="height:52px;border-radius:12px;background:#D48C7B;border:1px solid #312F2B"></span>
+        <span style="font-size:10.5px;color:#645F59">danger</span>
+        <span class="num" style="font-size:10.5px;color:#78736D">#D48C7B</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stack" style="gap:14px">
+    <span class="eyebrow">Type</span>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px">
+      <div class="stack" style="gap:11px">
+        <p class="num" style="font-size:40px;line-height:1.05">Newsreader</p>
+        <p style="font-size:12.5px;color:var(--ink-2);line-height:1.6">Screen titles and every number the app reports &mdash; doses, hours to peak, calories. A calm editorial serif does the work a bold sans was doing before, without shouting. Falls back to Georgia.</p>
+        <p class="num" style="font-size:26px">1,825 &middot; 2&#8239;h 47&#8239;min &middot; 10&#8239;mg</p>
+      </div>
+      <div class="stack" style="gap:11px">
+        <p style="font-size:40px;line-height:1.05;font-weight:500">Instrument Sans</p>
+        <p style="font-size:12.5px;color:var(--ink-2);line-height:1.6">Everything else: labels, body copy, buttons, navigation. Set at 400 and 500 only &mdash; the weight jumps that made the old UI feel busy are gone. Falls back to system-ui.</p>
+        <p style="font-size:15px">Uncheck anything you skip, then add what you ate instead.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="stack" style="gap:14px">
+    <span class="eyebrow">Components</span>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-items:start">
+      <div class="stack" style="gap:11px">
+        <div class="cta" style="height:76px">Log 10&#8239;mg now</div>
+        <div class="ghost">Add something else</div>
+        <div style="height:46px;border-radius:14px;border:1px solid var(--grid);background:var(--surface);display:flex;align-items:center;padding:0 14px;color:var(--muted);font-size:14.5px">Amount (mg)</div>
+      </div>
+      <div class="stack" style="gap:11px">
+        <div class="rowx" style="gap:4px;padding:4px;border:1px solid var(--grid);background:var(--surface);border-radius:16px">
+          <div style="flex-grow:1;height:34px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--ink-2)">7d</div>
+          <div style="flex-grow:1;height:34px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;background:var(--accent);color:var(--on-accent)">30d</div>
+          <div style="flex-grow:1;height:34px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--ink-2)">90d</div>
+          <div style="flex-grow:1;height:34px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--ink-2)">All</div>
+        </div>
+        <div class="card stack" style="gap:10px;padding:15px">
+          <span class="eyebrow">Card</span>
+          <div class="track"><div class="fill" style="width:72%"></div></div>
+          <div class="rowx" style="gap:8px"><span class="chip">Peak 5:15 PM</span></div>
+        </div>
+      </div>
+      <div class="stack" style="gap:11px">
+        <div class="card stack" style="gap:0;padding:4px 15px">
+          <div class="mrow" style="">
+            <span class="box on"><svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="var(--on-accent)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.6 8.4l3.4 3.4 7.4-7.9"/></svg></span>
+            <span style="flex-grow:1;font-size:14.5px;color:var(--ink-2)">2 eggs</span>
+            <span class="num" style="font-size:14.5px;color:var(--ink-2)">140</span>
+          </div>
+          <div class="mrow" style="border-bottom:none">
+            <span class="box"></span>
+            <span style="flex-grow:1;font-size:14.5px;">2 slices bread</span>
+            <span class="num" style="font-size:14.5px;color:var(--ink-2)">140</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="position:relative;width:390px;height:84px;border:1px solid var(--grid);border-radius:16px;background:var(--surface);overflow:hidden;margin-top:4px">
+
+      <nav class="tabbar" style="border-top:none">
+        <div class="tab on"><span class="pill"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5.5v13M5.5 12h13"/></svg></span>Log</div>
+        <div class="tab"><span class="pill"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 18.5h17L13.2 6.4a1.5 1.5 0 0 0-2.4 0z"/></svg></span>Peak</div>
+        <div class="tab"><span class="pill"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.6V12l3 1.9"/></svg></span>History</div>
+        <div class="tab"><span class="pill"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3v18M4.2 3v4.6a2.8 2.8 0 0 0 5.6 0V3"/><path d="M16.8 21V3.4c1.9 1.3 3 3.6 3 6.2 0 2.5-1.1 4.4-3 5.1"/></svg></span>Meals</div>
+        <div class="tab"><span class="pill"><svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16.5l5-5 3.3 3.3L20 7.5m0 0h-4.3M20 7.5v4.3"/></svg></span>Trends</div>
+      </nav>
+    </div>
+  </div>
+
+  <div class="stack" style="gap:10px">
+    <span class="eyebrow">Measures</span>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+      <div class="stack" style="gap:4px">
+        <span style="font-size:12.5px;font-weight:500">Radius</span>
+        <span style="font-size:12px;color:var(--ink-2);line-height:1.6">20px cards &middot; 24px primary &middot; 16px tiles &middot; 999px chips</span>
+      </div>
+      <div class="stack" style="gap:4px">
+        <span style="font-size:12.5px;font-weight:500">Rhythm</span>
+        <span style="font-size:12px;color:var(--ink-2);line-height:1.6">26px between sections &middot; 18px card padding &middot; 30px page top</span>
+      </div>
+      <div class="stack" style="gap:4px">
+        <span style="font-size:12.5px;font-weight:500">Hairlines</span>
+        <span style="font-size:12px;color:var(--ink-2);line-height:1.6">1px in --grid, and no shadow anywhere in light mode</span>
+      </div>
+      <div class="stack" style="gap:4px">
+        <span style="font-size:12.5px;font-weight:500">Targets</span>
+        <span style="font-size:12px;color:var(--ink-2);line-height:1.6">86px primary &middot; 52px rows &middot; 84px tab bar</span>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

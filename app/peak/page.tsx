@@ -23,10 +23,10 @@ export default async function PeakPage() {
   }
 
   return (
-    <main className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">Log peak</h1>
-        <p className="text-sm text-ink-2">
+    <main className="space-y-7">
+      <header className="space-y-1.5">
+        <h1 className="screen-title">Log peak</h1>
+        <p className="text-[13.5px] leading-relaxed text-ink-2">
           Mark the moment the medication peaked.
         </p>
       </header>
