@@ -33,6 +33,16 @@ const TABS = [
     ),
   },
   {
+    href: "/meals",
+    label: "Meals",
+    icon: (
+      <>
+        <path d="M7 2v20M4 2v5a3 3 0 0 0 6 0V2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M17 22V2.5c2 1.4 3.2 3.8 3.2 6.5 0 2.6-1.2 4.6-3.2 5.3" strokeLinecap="round" strokeLinejoin="round" />
+      </>
+    ),
+  },
+  {
     href: "/trends",
     label: "Trends",
     icon: (
@@ -46,7 +56,7 @@ export default function BottomNav() {
   if (pathname === "/login") return null;
   return (
     <nav className="fixed inset-x-0 bottom-0 border-t border-grid bg-card/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
-      <div className="mx-auto grid max-w-md grid-cols-4">
+      <div className="mx-auto grid max-w-md grid-cols-5">
         {TABS.map((tab) => {
           const active =
             tab.href === "/"

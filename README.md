@@ -2,7 +2,8 @@
 
 A personal, single-user medication tracker. Log doses from your phone, mark
 the moment the medication peaks, and see trends — above all, how long it takes
-to peak and whether that's drifting.
+to peak and whether that's drifting. It also carries a throwaway daily meal
+checklist that wipes itself overnight.
 
 Built with Next.js (App Router) + TypeScript, Tailwind, Recharts, and Neon
 Postgres via `@neondatabase/serverless`. Writes go through Server Actions — no
@@ -24,6 +25,9 @@ separate API layer. Deploys to Cloudflare Workers via
   re-link/unlink a peak.
 - **Trends** — time to peak over time, a distribution of how long it usually
   takes, and stat tiles, with 7d/30d/90d/all filters.
+- **Meals** — the day's eating plan as a checklist, with calories left against
+  the target, protein against its floor, and an "add something else" dialog for
+  anything off-plan. It is the one screen that stores nothing: see below.
 
 ## Access protection
 
@@ -131,6 +135,21 @@ Two tables (see `migrations/`):
 Migrations apply in filename order and are safe to re-run. `002_peaks.sql`
 replaced an earlier 0–10 effectiveness rating with `peak_at` and renamed
 `check_ins` to `peaks`.
+
+Meals are not in the database at all. The checklist is kept in the browser's
+`localStorage` under a key carrying the current **Eastern** date
+(`medtrack:meals:2026-09-03`), so a refresh keeps the day's checkmarks but
+midnight Eastern starts an empty plan — the app simply reads a key that isn't
+there. Keys for any other day are deleted on load, so nothing accumulates and
+there is no meal history to look back at. The day is re-checked every 30
+seconds and whenever the tab is refocused, so a page left open overnight
+clears itself too. The zone is `America/New_York`, which follows Eastern
+wall-clock time year-round (so it stays midnight through daylight saving),
+and it applies regardless of the phone's own timezone.
+
+The plan itself — target calories, protein floor, maintenance, the meal
+sections, and the quick-add list — is plain data at the top of `lib/meals.ts`;
+edit it there.
 
 The medication name, typical dose, and typical duration are env vars rather
 than a table, since the app tracks exactly one medication for one person.
