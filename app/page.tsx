@@ -1,5 +1,6 @@
 import Link from "next/link";
 import DoseForm from "@/components/DoseForm";
+import LevelChart from "@/components/LevelChart";
 import { Greeting, LocalTime, TimeAgo, WearOff } from "@/components/LocalTime";
 import SetupNotice from "@/components/SetupNotice";
 import {
@@ -14,20 +15,24 @@ import type { Dose } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 export default async function LogPage() {
-  let recent: Dose[] = [];
+  // 48 h rather than 24: the level curve starts at midnight, and doses from
+  // the previous evening are still on board then.
+  let window: Dose[] = [];
   let dbError: string | null = null;
   try {
     const sql = db();
     const rows = await sql`
       select id, taken_at, amount::float8 as amount, notes
       from doses
-      where taken_at >= now() - interval '24 hours'
+      where taken_at >= now() - interval '48 hours'
       order by taken_at desc`;
-    recent = rows.map(mapDose);
+    window = rows.map(mapDose);
   } catch (error) {
     dbError = friendlyDbError(error);
   }
 
+  const dayAgo = Date.now() - 24 * 3_600_000;
+  const recent = window.filter((d) => new Date(d.takenAt).getTime() >= dayAgo);
   const lastDose = recent[0] ?? null;
 
   return (
@@ -47,6 +52,8 @@ export default async function LogPage() {
       ) : (
         <>
           <DoseForm typicalDose={TYPICAL_DOSE_MG} />
+
+          <LevelChart doses={window} />
 
           <section className="space-y-3.5 rounded-[20px] border border-grid bg-card p-[18px]">
             <div className="flex items-baseline justify-between">

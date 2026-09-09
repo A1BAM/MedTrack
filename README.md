@@ -16,6 +16,15 @@ separate API layer. Deploys to Cloudflare Workers via
   evening / night), then one big button that logs a dose at the current time
   with your typical amount; expandable options for a different amount, a
   backdated time, or notes.
+  It also carries an **estimated level** curve for the day: a one-compartment
+  pharmacokinetic model (`lib/pk.ts`) summing every dose still on board, drawn
+  solid up to now and dashed for the projection ahead. Hold and drag across it
+  to read any time of day. The shape comes from two numbers,
+  `NEXT_PUBLIC_HALF_LIFE_HOURS` and `NEXT_PUBLIC_TIME_TO_PEAK_HOURS`
+  (defaults 3 h and 1.5 h — typical immediate-release figures); the absorption
+  rate is solved from the time-to-peak rather than guessed. It is a
+  population-average estimate, not a measurement — real clearance varies
+  several-fold between people.
 - **Peak** — one big button that records the peak at the current time, plus
   options for a different time, side effects, and notes. It shows how long
   after your dose the peak landed, and auto-links to the most recent dose
