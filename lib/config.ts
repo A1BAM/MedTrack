@@ -12,5 +12,15 @@ export const TYPICAL_DURATION_HOURS = Number(
   process.env.NEXT_PUBLIC_TYPICAL_DURATION_HOURS ?? "4"
 );
 
+// Shape of the estimated-level curve on the Log screen (see lib/pk.ts).
+// Defaults are the usual immediate-release figures: a 3 h half-life (quoted
+// range 2–3.5 h in adults) peaking around 1.5 h after the dose.
+export const HALF_LIFE_HOURS = Number(
+  process.env.NEXT_PUBLIC_HALF_LIFE_HOURS ?? "3"
+);
+export const TIME_TO_PEAK_HOURS = Number(
+  process.env.NEXT_PUBLIC_TIME_TO_PEAK_HOURS ?? "1.5"
+);
+
 // A new peak auto-links to the most recent dose taken within this window.
 export const AUTO_LINK_WINDOW_HOURS = 16;
