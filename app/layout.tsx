@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Instrument_Sans, Newsreader } from "next/font/google";
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
-import { MED_NAME } from "@/lib/config";
 
 // Self-hosted at build time, so there's no third-party request at runtime and
 // no flash of fallback type.
@@ -17,9 +16,13 @@ const display = Newsreader({
   variable: "--font-display",
 });
 
+// Deliberately generic: this metadata is also served on the public login
+// page, so it mustn't name the medication. Search engines are told to stay
+// away too.
 export const metadata: Metadata = {
-  title: `${MED_NAME} — MedTrack`,
-  description: "Personal medication effectiveness tracker",
+  title: "MedTrack",
+  description: "Private tracker",
+  robots: { index: false, follow: false },
 };
 
 export const viewport: Viewport = {

@@ -53,5 +53,8 @@ export function friendlyDbError(error: unknown): string {
   if (message.includes("does not exist")) {
     return "The database is missing the latest tables or columns. Run `npm run migrate`, or paste the newest file in migrations/ into the Neon SQL editor — see the README.";
   }
-  return `Database error: ${message}`;
+  // Anything else stays in the server logs: raw driver errors can carry
+  // hostnames, query text, or connection details.
+  console.error("database error", error);
+  return "Something went wrong talking to the database. Check the Worker logs for details.";
 }

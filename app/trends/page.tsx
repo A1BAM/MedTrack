@@ -1,11 +1,13 @@
 import SetupNotice from "@/components/SetupNotice";
 import TrendCharts from "@/components/TrendCharts";
 import { db, friendlyDbError, mapDose, toIsoOrNull } from "@/lib/db";
+import { requireSession } from "@/lib/session";
 import type { Dose, TrendPeak } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 export default async function TrendsPage() {
+  await requireSession();
   let peaks: TrendPeak[] = [];
   let doses: Dose[] = [];
   let dbError: string | null = null;

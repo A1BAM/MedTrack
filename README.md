@@ -41,16 +41,73 @@ separate API layer. Deploys to Cloudflare Workers via
 
 ## Access protection
 
-The whole app sits behind a password. Middleware checks a signed session
-cookie on every request (pages, data, and Server Action writes alike) and
-redirects to `/login` otherwise — including when the auth secrets aren't
-configured yet, so it fails closed. Logging in with `APP_PASSWORD` sets an
+The whole app sits behind a password. Logging in with `APP_PASSWORD` sets an
 HttpOnly cookie signed with `SESSION_SECRET` (HMAC-SHA256), valid for 30 days.
+The session is checked in two places:
+
+- **Middleware** checks the cookie on every request and redirects to `/login`
+  otherwise.
+- **Every data page and every Server Action** checks it again itself
+  (`lib/session.ts`). A middleware mistake or a framework bypass bug can't
+  expose or delete data on its own.
+
+It **fails closed**. Nobody can log in, and every existing session is
+rejected, while any of these is true:
+
+- `APP_PASSWORD` or `SESSION_SECRET` is missing.
+- Either is still the example value from `.env.example`.
+- `APP_PASSWORD` is shorter than 12 characters.
+- `SESSION_SECRET` is shorter than 32 characters.
+
+The login page says which one is wrong. Generate the secret with
+`openssl rand -hex 32`.
+
+**Brute-force protection.** Login attempts are recorded in the
+`login_attempts` table (`migrations/003_login_attempts.sql`), keyed by a
+salted hash of the client's IP, never the raw address. Two limits apply:
+
+| Limit | What it stops | When it's hit |
+| --- | --- | --- |
+| 10 attempts per IP (per /64 for IPv6) per 15 minutes | One source hammering the form | That IP is locked out for the rest of the window |
+| 50 attempts across all IPs per hour | Attackers rotating through many addresses | Nobody can log in fresh until it drains |
+
+Notes on the limits:
+
+- Already logged-in sessions keep working through either lockout.
+- A successful login clears that IP's count.
+- If the table is missing or the database is unreachable, login is refused
+  rather than unthrottled. **Run `npm run migrate` before deploying this
+  version.**
+
+**Logging out everywhere.** A session cookie is self-contained, so logging
+out only removes it from that browser. To revoke every session, including a
+lost phone or a leaked cookie, change `APP_PASSWORD` (or rotate
+`SESSION_SECRET`). Sessions are bound to both, so all of them stop working
+immediately.
+
+**Other hardening:**
+
+- The login page and tab title don't name the medication, and search
+  engines are told not to index the site.
+- Database error details stay in the Worker logs instead of reaching the
+  browser.
+- Server Actions validate their input at runtime.
+- Every response carries security headers: HSTS, `frame-ancestors 'none'` /
+  `X-Frame-Options`, `nosniff`, `Referrer-Policy: no-referrer`, and a
+  restrictive `Permissions-Policy`. The `X-Powered-By` header is removed.
+- `preview_urls` is off in `wrangler.jsonc`, so old deployed versions don't
+  stay reachable.
 
 Pick a long, unique password — it is the only thing between the internet and
 your health data. For an extra layer you can additionally put the Worker
 behind [Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/)
-on a custom domain.
+on a custom domain. If you do, also set `"workers_dev": false` in
+`wrangler.jsonc`, or the `*.workers.dev` URL remains a way around Access.
+
+Anything bundled for the browser is served from `/_next/static` without
+login. Server-rendered data is not in those files, but client-side code is,
+such as the meal plan in `lib/meals.ts` and the dose-curve settings. Don't
+put anything there you'd mind being public.
 
 ## 1. Create the database (Neon)
 
@@ -77,8 +134,8 @@ the project's compute.
 cp .env.example .env.local
 # edit .env.local:
 #   DATABASE_URL                — the Neon connection string from step 1
-#   APP_PASSWORD                — the password that unlocks the app
-#   SESSION_SECRET              — run: openssl rand -hex 32
+#   APP_PASSWORD                — the password that unlocks the app (12+ chars)
+#   SESSION_SECRET              — run: openssl rand -hex 32 (32+ chars)
 #   NEXT_PUBLIC_MED_NAME        — medication name shown in the UI
 #   NEXT_PUBLIC_TYPICAL_DOSE_MG — your typical dose in mg
 
@@ -129,11 +186,13 @@ Notes:
 - `npm run preview` runs the real Workers runtime locally; it reads secrets
   from a `.dev.vars` file (copy `.dev.vars.example`, it's gitignored).
 - The migration runs from your machine (`npm run migrate`), not from the
-  Worker.
+  Worker. Run it before deploying a version that adds a migration: login
+  refuses to work until `login_attempts` exists.
 
 ## Data model
 
-Two tables (see `migrations/`):
+Two data tables, plus `login_attempts` for brute-force protection
+(see `migrations/`):
 
 - `doses` — `taken_at`, `amount` (mg), optional `notes`.
 - `peaks` — `peak_at` (when the peak happened), `recorded_at` (when it was

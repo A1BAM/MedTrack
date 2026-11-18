@@ -2,11 +2,13 @@ import PeakForm from "@/components/PeakForm";
 import SetupNotice from "@/components/SetupNotice";
 import { AUTO_LINK_WINDOW_HOURS } from "@/lib/config";
 import { db, friendlyDbError, mapDose } from "@/lib/db";
+import { requireSession } from "@/lib/session";
 import type { Dose } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 export default async function PeakPage() {
+  await requireSession();
   let recentDoses: Dose[] = [];
   let dbError: string | null = null;
   try {

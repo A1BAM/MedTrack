@@ -2,31 +2,72 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { createSessionToken, safeEqual, SESSION_COOKIE } from "./auth";
+import {
+  createSessionToken,
+  readAuthConfig,
+  safeEqual,
+  SESSION_COOKIE,
+} from "./auth";
+import {
+  clearLoginAttempts,
+  clientKey,
+  recordLoginAttempt,
+} from "./rate-limit";
 import type { ActionResult } from "./types";
+
+const MAX_PASSWORD_INPUT = 1024;
 
 export async function login(
   _prev: ActionResult,
   formData: FormData
 ): Promise<ActionResult> {
-  const password = String(formData.get("password") ?? "");
-  const expected = process.env.APP_PASSWORD;
-  const secret = process.env.SESSION_SECRET;
+  const auth = readAuthConfig();
+  if (!auth.ok) {
+    return { ok: false, message: auth.reason };
+  }
+  const { config } = auth;
 
-  if (!expected || !secret) {
+  const raw = formData.get("password");
+  const password = typeof raw === "string" ? raw : "";
+  if (!password || password.length > MAX_PASSWORD_INPUT) {
+    return { ok: false, message: "Wrong password." };
+  }
+
+  // Throttle before the password is even compared. If the attempts table
+  // can't be reached, fail closed rather than allow unlimited guessing.
+  let client: string;
+  try {
+    client = await clientKey(config.secret);
+    const limit = await recordLoginAttempt(client);
+    if (!limit.allowed) {
+      return {
+        ok: false,
+        message: "Too many attempts. Wait a while and try again.",
+      };
+    }
+  } catch (error) {
+    console.error("login rate limit check failed", error);
     return {
       ok: false,
       message:
-        "APP_PASSWORD and SESSION_SECRET are not configured on the server — see the README.",
+        "Login is unavailable: the server couldn't check the attempt limit. Make sure DATABASE_URL is set and `npm run migrate` has been run — see the README.",
     };
   }
-  if (!password || !(await safeEqual(password, expected))) {
-    // Small fixed delay to make brute-forcing slower.
+
+  if (!(await safeEqual(password, config.password))) {
+    // Small fixed delay on top of the rate limit.
     await new Promise((resolve) => setTimeout(resolve, 400));
     return { ok: false, message: "Wrong password." };
   }
 
-  const { token, expires } = await createSessionToken(secret);
+  try {
+    await clearLoginAttempts(client);
+  } catch (error) {
+    // Not fatal: the attempts age out on their own.
+    console.error("couldn't clear login attempts", error);
+  }
+
+  const { token, expires } = await createSessionToken(config);
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,

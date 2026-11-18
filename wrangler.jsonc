@@ -10,7 +10,16 @@
   },
   "observability": {
     "enabled": true
-  }
+  },
+  // Per-version preview URLs would keep every old deployment reachable on
+  // the internet, with production secrets and data, including versions
+  // running dependencies that have since been patched.
+  "preview_urls": false
+  // Once the app is on a custom domain behind Cloudflare Access, also add
+  //   "workers_dev": false
+  // or the *.workers.dev URL stays reachable without going through Access.
+  // (Leave it out while workers.dev is the only URL you use — it would take
+  // the app offline.)
   // Secrets (DATABASE_URL, APP_PASSWORD, SESSION_SECRET) are NOT set here —
   // use `npx wrangler secret put <NAME>` or the Cloudflare dashboard, and
   // .dev.vars for local preview. See README.

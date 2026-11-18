@@ -1,11 +1,13 @@
 import HistoryList from "@/components/HistoryList";
 import SetupNotice from "@/components/SetupNotice";
 import { db, friendlyDbError, mapDose, mapPeak } from "@/lib/db";
+import { requireSession } from "@/lib/session";
 import type { Dose, Peak } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 export default async function HistoryPage() {
+  await requireSession();
   let doses: Dose[] = [];
   let peaks: Peak[] = [];
   let dbError: string | null = null;
