@@ -9,12 +9,14 @@ import {
   TYPICAL_DURATION_HOURS,
 } from "@/lib/config";
 import { db, friendlyDbError, mapDose } from "@/lib/db";
+import { requireSession } from "@/lib/session";
 import { greeting } from "@/lib/format";
 import type { Dose } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 export default async function LogPage() {
+  await requireSession();
   // 48 h rather than 24: the level curve starts at midnight, and doses from
   // the previous evening are still on board then.
   let window: Dose[] = [];
